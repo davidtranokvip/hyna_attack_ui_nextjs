@@ -1,0 +1,167 @@
+@import url('./assets/styles/login.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary-color: #00ff00;
+  --bg-color: #000;
+  --text-color: #00ff00;
+  --error-color: #ff0000;
+}
+*,
+::before,
+::after {
+  box-sizing: border-box;
+  border-width: 0;
+  border-style: solid;
+  border-color: #444444;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #171717;
+    --foreground: #ededed;
+  }
+}
+
+body, html {
+  height: 100%;
+  width: 100%;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+code {
+  word-break: break-word;
+  padding: 0.125rem 0.3125rem;
+  border-radius: 0.1875rem;
+  background: rgba(255, 124, 124, 0.1);
+  color: #FF7C7C; 
+}
+
+.notice_success {
+  filter: drop-shadow(0 0 15px #00ff40);
+}
+
+.notice_success .notice {
+  background: #019500;
+  --aug-border-bg: #31ff00;
+  width: 100%;
+  opacity: 1.5;
+  overflow: hidden;
+  transition: all .5s;
+}
+
+.notice_error {
+  filter: drop-shadow(0 0 15px var(--error-color));
+}
+.notice_error .notice {
+  background: #950000;
+  --aug-border-bg: var(--error-color);
+  width: 100%;
+  opacity: 1.5;
+  overflow: hidden;
+  transition: all .5s;
+}
+
+.scanlines {
+  background: #072c07;
+  color: var(--text-color);
+  font-family: monospace;
+}
+
+.bg-fe::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%,
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.card {
+  background-color: #2c2c2c;
+  border: 1px solid #444444;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.deznav .metismenu a {
+  position: relative;
+  display: block;
+  padding: 0.625rem 1.875rem;
+  outline-width: 0;
+  color: #737B8B;
+  text-decoration: none;
+}
+.transform-50 {
+  transform: translate(-50%, -50%);
+}
+
+*::-webkit-scrollbar {
+  width: 5px; /* Width of the scrollbar */
+  scrollbar-color: #202020;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar-track {
+  background: #202020; /* Dark background like your sidebar */
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgb(0, 255, 0); /* Gray thumb, matching your menu buttons */
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #718096; /* Lighter gray on hover */
+}
+
+.ant-slider-rail {
+  background-color: #333 !important;
+}
+
+.ant-slider-track {
+  background-color:rgb(0, 255, 0) !important;
+}
+
+.ant-slider-mark-text {
+  color: white !important; 
+  font-size: 18px;
+}
+
+.ant-slider-handle {
+  border-color: rgb(0, 255, 0) !important;
+}
+
+.ant-slider-handle:hover::after, 
+.ant-slider-handle::after {
+  box-shadow: 0 0 0 2.5px #ff1616 !important;
+}
+
+.ant-tooltip {
+  z-index: 0 !important;
+}
+
+.ant-table-placeholder,
+tr.ant-table-placeholder:hover>td {
+  background: #2c2c2c !important;
+}
+.ant-empty-description, .ant-select-arrow {
+  color:rgb(0, 255, 0) !important;
+}
+.ant-table-cell-row-hover {
+  background: #2c2c2c !important;
+}
+td, th {
+  border-bottom: 1px solid #444444 !important;
+}
