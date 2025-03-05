@@ -7,8 +7,6 @@ import { extend, useFrame, createPortal } from '@react-three/fiber';
 import { fragmentShader, vertexShader } from './index';
 import { SimulationMaterial } from './SimulationMaterial';
 
-// extend({ SimulationMaterial: SimulationMaterial });
-
 extend({ SimulationMaterial });
 
 const FBOParticles: React.FC = () => {

@@ -16,7 +16,7 @@ const CameraController = () => {
       }
       gl.setSize(gl.domElement.clientWidth, gl.domElement.clientHeight);
     };
-
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [camera, gl]);
@@ -27,7 +27,7 @@ const CameraController = () => {
 
 const Scene: React.FC = () => {
   return (
-    <Canvas camera={{ position: [1.5, 1.5, 1.5] }} className="h-full w-full" shadows={true}>
+    <Canvas camera={{ position: [1.5, 1.5, 1.5] }} className="h-full w-full" shadows={true} gl={{ antialias: true }}>
       <CameraController />
       <ambientLight intensity={0.3} />
       <FBOParticles />
@@ -35,4 +35,4 @@ const Scene: React.FC = () => {
   );
 };
 
-export default Scene;
+export default React.memo(Scene);

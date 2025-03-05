@@ -3,9 +3,9 @@ import React, { useRef, useEffect } from 'react';
 import Scene from '@/components/threejs/Scene';
 
 interface SceneWrapperProps {
-  height?: string;
+  myClass?: string;
 }
-const SceneWrapper: React.FC<SceneWrapperProps> = ({height}) => {
+const SceneWrapper: React.FC<SceneWrapperProps> = ({myClass}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -33,7 +33,7 @@ const SceneWrapper: React.FC<SceneWrapperProps> = ({height}) => {
   return (
     <div 
       ref={containerRef} 
-      className={`${height} w-full relative`}
+      className={`${myClass} w-full relative`}
     >
       <Scene />
     </div>

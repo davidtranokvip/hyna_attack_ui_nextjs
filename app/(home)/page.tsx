@@ -18,16 +18,6 @@ export default function Home() {
   const [isSearched, setIsSearched] = useState(false);
   const [error, setError] = useState("");
   const [domain, setDomain] = useState("");
-  // const [sceneKey, setSceneKey] = useState(0);
-  // const isInitialMount = useRef(true);
-  
-  // const handleLayoutComplete = () => {
-  //   if (isInitialMount.current) {
-  //     isInitialMount.current = false;
-  //   } else {
-  //     setSceneKey(prev => prev + 1);
-  //   }
-  // };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -94,6 +84,7 @@ export default function Home() {
     .filter((item: any) => item.statusCode !== 200)
   const description = `Phân tích hoàn tất: Website ${domain} đang ${blockedCountries.length > 10 ? 'chặn' : 'mở'} trên phạm vi quốc tế nhưng ${netWorks.length > 0 ? `bị blocked từ các nhà mạng ${blockedNetworks}` : `vẫn hoạt động bình thường từ các nhà mạng` } tại VIỆT NAM _`;
 
+  console.log(blockingInterNet);
   return (
     <>
       {error && (
@@ -109,9 +100,8 @@ export default function Home() {
                   isSearched ? 'col-start-1 col-end-2' : 'col-start-2 col-end-3'
                 }`}
                 transition={{ duration: 0.5, ease: ["easeOut", "easeIn"], }}
-                // onLayoutAnimationComplete={handleLayoutComplete}
               >
-                <SceneWrapper height="h-[450px] mb-3" />
+                <SceneWrapper myClass="h-[450px] mb-3" />
                   <AnimatePresence>
                     {isSearched && (
                       <motion.h2

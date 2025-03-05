@@ -1,3 +1,4 @@
+import { encryptData } from "@/helpers/payloadData";
 import { axiosInstancePublic } from "@/shared/utils/ApiUtils";
 
 export interface ILoginReq {
@@ -6,13 +7,20 @@ export interface ILoginReq {
 }
 
 interface ILoginRes {
-  token?: string;
+  data: {
+    token: string;
+  };
   message: string;
-  status?: string;
+  status: string;
 }
 
 export const loginApi = async (req: ILoginReq) => {
-  const result = await axiosInstancePublic.post<ILoginRes>("auth/login", req);
+  const encryptedData = encryptData(req);
+  const result = await axiosInstancePublic.post<ILoginRes>("auth/login", {
+    encryptedData: encryptedData.encryptedData,
+    encryptedKey: encryptedData.encryptedKey,
+    iv: encryptedData.iv,  
+  });
   return result.data;
 };
 

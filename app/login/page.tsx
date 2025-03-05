@@ -8,7 +8,6 @@ import styled from "styled-components";
 import NoticeError from "@/components/notice/NoticeError";
 import NoticePass from "@/components/notice/NoticePass";
 import SceneWrapper from "@/components/SceneWrapper";
-// import Cookies from 'js-cookie';
 import { setTokenCookie } from "@/shared/utils/cookies";
 
 export default function Page() {
@@ -19,7 +18,7 @@ export default function Page() {
     const [success, setSuccess] = useState(""); 
     
     useEffect(() => {
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem('hyna_token');
         if(token) return router.push('/');
     }, [router]);
 
@@ -30,10 +29,10 @@ export default function Page() {
                 password: values.password
             };
           
-            const res = await loginApi(data);
-            if (res.token) {
-                setTokenCookie(res.token)
-                setSuccess(res.message);
+            const result = await loginApi(data);
+            if (result.status === 'success') {
+                setTokenCookie(result.data.token)
+                setSuccess(result.message);
                 setTimeout(() => {
                   router.push("/");
                 }, 1500);
@@ -42,8 +41,7 @@ export default function Page() {
             setError(error.response.data.message);
       };
     }
-    
-    return (
+    return (    
         <div className="scanlines">
             {error && (
                 <NoticeError error={error} setError={setError} myClass="text-8xl"/>
@@ -55,7 +53,7 @@ export default function Page() {
                 <div className="pt-4 text-2xl">
                     <h2>CONNECTION ESTABLISHED</h2>
                 </div>  
-                <SceneWrapper height="h-[410px]" />
+                <SceneWrapper myClass="h-[410px]" />
                 <div className="text-center">
                     <h3 className="title_login hero glitch layers">
                         <span>

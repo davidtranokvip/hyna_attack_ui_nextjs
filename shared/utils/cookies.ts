@@ -1,18 +1,18 @@
 import Cookies from 'js-cookie';
 
 export const setTokenCookie = (token: string) => {
-  Cookies.set('access_token', token, { 
-    expires: 1,
+  Cookies.set('hyna_token', token, { 
+    expires: 100 / (24 * 60),
     path: '/',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict'
-  });
+  }); 
 };
 
 export const getTokenFromCookie = () => {
-  return Cookies.get('access_token') || null;
+  return Cookies.get('hyna_token') || null;
 };
 
 export const removeTokenCookie = () => {
-  Cookies.remove('access_token', { path: '/' });
+  Cookies.remove('hyna_token', { path: '/' });
 };
