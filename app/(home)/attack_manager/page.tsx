@@ -2,7 +2,6 @@
 
 import { Card, Popconfirm, Table, TableProps } from 'antd';
 import React from 'react';
-import styled from 'styled-components';
 
 const dataList =  [
     {
@@ -60,7 +59,7 @@ const Page = () => {
         <div className="overflow-hidden h-full inner-body">
             <div className="content-body h-full">
                 <div className="mx-auto p-8 relative">
-                    <CustomCardStyled title='ATTACK MANAGER'>
+                    <Card title='ATTACK MANAGER'>
                         <Table
                         pagination={false}
                         rowKey="id"
@@ -70,30 +69,11 @@ const Page = () => {
                         dataSource={dataList}
                         style={{ marginBottom: 16, tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
                         />
-                    </CustomCardStyled>
+                    </Card>
                 </div>
             </div>
         </div>
     )
 }
-
-
-const CustomCardStyled = styled(Card)`
-    border-radius: 0.375rem;
-    height: 100%;
-    border: 0.0625rem solid #444444 !important;
-    background: #2c2c2c !important;
-
-    .ant-card-head {
-        border-color: rgb(0, 255, 0) !important;
-    }
-    .ant-card-head-title {
-        line-height: normal;
-        font-weight: 700;
-        font-size: 30px;
-        color: rgb(0, 255, 0) !important;
-    }
-`;
-
 
 export default Page;

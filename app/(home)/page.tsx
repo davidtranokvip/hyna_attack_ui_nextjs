@@ -18,16 +18,6 @@ export default function Home() {
   const [isSearched, setIsSearched] = useState(false);
   const [error, setError] = useState("");
   const [domain, setDomain] = useState("");
-  // const [sceneKey, setSceneKey] = useState(0);
-  // const isInitialMount = useRef(true);
-  
-  // const handleLayoutComplete = () => {
-  //   if (isInitialMount.current) {
-  //     isInitialMount.current = false;
-  //   } else {
-  //     setSceneKey(prev => prev + 1);
-  //   }
-  // };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -109,7 +99,6 @@ export default function Home() {
                   isSearched ? 'col-start-1 col-end-2' : 'col-start-2 col-end-3'
                 }`}
                 transition={{ duration: 0.5, ease: ["easeOut", "easeIn"], }}
-                // onLayoutAnimationComplete={handleLayoutComplete}
               >
                 <SceneWrapper height="h-[450px] mb-3" />
                   <AnimatePresence>

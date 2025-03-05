@@ -1,14 +1,9 @@
 "use client";
 
-// import { useEffect, useState } from "react";
 import { Layout } from "antd";
 import HeaderAttack from "@/components/elements/HeaderAttack";
 import SidebarAttack from "@/components/elements/SiderAttack";
 import NavHeader from "@/components/elements/NavHeader";
-// import { useAuth } from "@/shared/context/auth-context";
-// import { useRouter } from "next/router";
-// import AuthGuard from "@/shared/hooks/AuthGuard";
-
 const { Header, Content, Sider } = Layout;
 
 const layoutStyle = {
