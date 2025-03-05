@@ -1,46 +1,61 @@
+import { DataListResponse } from "@/shared/types/ApiResponse";
 import { axiosInstance } from "@/shared/utils/ApiUtils";
 
 const apiUrl = "permissions";
 
-export interface IPermissionRes {
-  status: string;
-  message: string;
-  data: IPermissionItem[];
+export interface ICreatePermissionReq {
+  name?: string;
+  module?: string;
+  route?: string;
 }
 
-export interface IPermissionItem {
-  id: number;
+export interface IPermission {
+  id?: number;
   route: string;
-  module: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
+  module?: string;
+  name?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  status?: string;
 }
 
-export type IPermissionReq = Omit<IPermissionItem, 'id'>;
+export interface IPermissionQueryReq {
+  page?: number;
+  limit?: number;
+  search?: string;
+  module?: string;
+  route?: string;
+}
 
-export type IPermissionId = Pick<IPermissionItem, 'id'>;
-
-export const createPermission = async (body: IPermissionReq) => {
-  const result = await axiosInstance.post<IPermissionRes>(apiUrl, body);
+export const createPermission = async (body: ICreatePermissionReq) => {
+  const result = await axiosInstance.post<IPermission>(apiUrl, body);
   return result.data;
 };
 
-export const getPermissionList = async () => {
-  const result = await axiosInstance.get<IPermissionRes>(apiUrl);
+// export const getPermissionList = async (query: IPermissionQueryReq = {}) => {
+//   const result = await axiosInstance.get<DataListResponse<IPermission>>(
+//     apiUrl,
+//     {
+//       params: query,
+//     }
+//   );
+//   return result.data;
+// };   
+
+export const updatePermission = async (
+  id: number,
+  body: ICreatePermissionReq
+) => {
+  const result = await axiosInstance.put<IPermission>(`${apiUrl}/${id}`, body);
   return result.data;
-};   
-export const updatePermission = async (data: IPermissionItem) => {
-  const result = await axiosInstance.put(`${apiUrl}/${data?.id}`, data);
-  return result.data;
-}
+};
 
 export const deletePermission = async (id: number) => {
-  const result = await axiosInstance.delete<IPermissionRes>(`${apiUrl}/${id}`);
+  const result = await axiosInstance.delete<IPermission>(`${apiUrl}/${id}`);
   return result.data;
 };
 
 export const getPermissionsByUser = async () => {
-  const result = await axiosInstance.get<{data: IPermissionItem[]}>(`${apiUrl}/user`);
+  const result = await axiosInstance.get<{data: IPermission[]}>(`${apiUrl}/user`);
   return result.data;
 };

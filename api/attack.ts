@@ -1,5 +1,4 @@
 
-import { encryptData } from "@/helpers/payloadData";
 import { DataListResponse } from "@/shared/types/ApiResponse";
 import { axiosInstance } from "@/shared/utils/ApiUtils";
 
@@ -74,10 +73,8 @@ export const getAttackById = async (id: number) => {
 };
 
 export const createAttack = async (body: any) => {
-  const encryptedData = encryptData(body);
-  const result = await axiosInstance.post<IAttackLog>(apiUrl, {encryptedData: encryptedData.encryptedData,
-    encryptedKey: encryptedData.encryptedKey,
-    iv: encryptedData.iv,  });
+    console.log(body);
+  const result = await axiosInstance.post<IAttackLog>(apiUrl, body);
   return result.data;
 };
 

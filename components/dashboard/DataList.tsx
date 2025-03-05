@@ -8,7 +8,6 @@ import {
   Geography,
 } from "react-simple-maps";
 import Loading from "../elements/Loading";
-import { Table, TableProps } from "antd";
 
 interface FilterItemType {
   id: number;
@@ -45,26 +44,6 @@ const itemVariants = {
   }
 };
 
-const columns: TableProps<FilterItemType>['columns'] = [
-  {
-    title: 'Location',
-    dataIndex: 'location',
-    key: 'location',
-    className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-  },
-  {
-    title: 'Status',
-    dataIndex: 'code',
-    key: 'code',
-    className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-  },
-  {  
-    title: 'IP',
-    dataIndex: 'ip',
-    key: 'ip',
-    className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-  },
-];
 const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingInterNet, blockedCountries }) => {
   // const [tooltipContent, setTooltipContent] = useState("");
     return (
@@ -78,14 +57,8 @@ const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingI
           </div>
           <div className="card flex flex-col col-[2] row-[1_/_span_6] overflow-y-auto scrollbar-custom">
               <div className="font-bold text-primary text-[30px] leading-[normal]">ATTACK SURFACE ANALYSIS</div>
-              <div className={`flex flex-col mt-2 px-3 h-full ${filteredAndSorted && filteredAndSorted.length > 0 ? 'overflow-auto' : 'overflow-hidden'}`}>
-              <Table
-                  columns={columns}
-                  // dataSource={dataList}
-                  loading={true}
-                  style={{ height: '100%', tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
-                />
-                {/* <table className="table-fixed">
+              <div className={`flex flex-col mt-2 px-3 ${filteredAndSorted && filteredAndSorted.length > 0 ? 'overflow-auto' : 'overflow-hidden'}`}>
+                <table className="table-fixed">
                   <thead className="sticky top-0 z-10 bg-card border-myborder">
                     <tr>
                       <th className="text-left"><h4 className="text-primary text-xl">Location</h4></th>
@@ -96,28 +69,15 @@ const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingI
                   <tbody>
                   {filteredAndSorted.length > 0 ? (
                     filteredAndSorted.map((item: any, index) => (
-                      <tr key={index} >
-                        <td className="h-[38px] border-t">
-                          <div className="flex items-center gap-4">
-                            <div className="relative flex items-center gap-3">
-                              {[...Array(6)].map((_, index) => (
-                                <Loading index={index} key={index}/>
-                              ))}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="border-t h-[38px]"></td>
-                        <td className="border-t h-[38px]"></td>
-                      </tr>
                         <motion.tr
                           key={index}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.1, duration: 0.6, ease: 'easeOut' }}
                         >
-                          <td className="h-[38px] py-2 border-t text-primary">{item.location}</td>
-                          <td className="h-[38px] py-2 border-t text-primary">{item.code}</td>
-                          <td className="h-[38px] py-2 border-t text-primary text-right">{item["IP address"]}</td>
+                          <td className="py-2 border-t text-primary">{item.location}</td>
+                          <td className="py-2 border-t text-primary">{item.code}</td>
+                          <td className="py-2 border-t text-primary text-right">{item["IP address"]}</td>
                         </motion.tr>
                       ))
                   ) : (
@@ -138,7 +98,7 @@ const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingI
                      ))
                   )} 
                   </tbody>
-                </table> */}
+                </table>
             </div>
           </div>
           <div className={`card flex flex-col col-[1] row-[2_/_span_3] overflow-hidden px-3`}>
@@ -197,7 +157,7 @@ const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingI
           <div className="card flex flex-col col-[1] row-[5_/_span_2] overflow-hidden">
               <div className="font-bold text-primary text-[30px] leading-[normal]">NETWORK BLOCK DETECTION</div>
               {blockingInterNet?.length > 0 ? (
-                <motion.ul  
+                <motion.ul 
                 className="mt-3 px-3"
                 initial="hidden"
                 animate="visible"

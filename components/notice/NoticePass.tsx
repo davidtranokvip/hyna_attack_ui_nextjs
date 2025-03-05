@@ -28,6 +28,7 @@ const NoticePass = ({success, setSuccess, myClass }: INoticePassProps ) => {
               ease: [0.4, 0, 0.2, 1]
             }}
           >
+
             <motion.div 
               className="notice flex py-16	px-8 justify-center items-center opacity-40" 
               data-augmented-ui="border"

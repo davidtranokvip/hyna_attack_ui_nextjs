@@ -2,7 +2,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -11,7 +10,6 @@
   --text-color: #00ff00;
   --error-color: #ff0000;
 }
-
 *,
 ::before,
 ::after {
@@ -54,7 +52,7 @@ code {
   width: 100%;
   opacity: 1.5;
   overflow: hidden;
-  transition: all 0.02s;
+  transition: all .5s;
 }
 
 .notice_error {
@@ -66,7 +64,7 @@ code {
   width: 100%;
   opacity: 1.5;
   overflow: hidden;
-  transition: all 0.02s;
+  transition: all .5s;
 }
 
 .scanlines {
@@ -74,7 +72,7 @@ code {
   color: var(--text-color);
   font-family: monospace;
 }
-/* 
+
 .bg-fe::before {
   content: "";
   position: fixed;
@@ -89,7 +87,7 @@ code {
   background-size: 100% 4px;
   pointer-events: none;
   z-index: 100;
-} */
+}
 
 .card {
   background-color: #2c2c2c;
@@ -137,7 +135,7 @@ code {
 }
 
 .ant-slider-mark-text {
-  color: rgb(0, 255, 0) !important; 
+  color: white !important; 
   font-size: 18px;
 }
 
@@ -166,33 +164,4 @@ tr.ant-table-placeholder:hover>td {
 }
 td, th {
   border-bottom: 1px solid #444444 !important;
-}
-
-.ant-card .ant-card-head {
-  border-bottom-color: rgb(0, 255, 0) !important;
-}
-.ant-card .ant-card-head .ant-card-head-title {
-  font-size: 24px;
-  font-weight: 800;
-}
-.ant-btn {
-  background-color: rgb(0, 255, 0) !important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  color: #000 !important;
-}
-.ant-modal-header {
-  margin-bottom: 16px !important;
-}
-.ant-modal-body {
-  padding: 0 10px 0 10px !important;
-}
-.ant-table-thead >tr>th {
-  text-align: center !important;
-}
-.ant-switch.ant-switch-checked {
-  background-color: rgb(0, 255, 0) !important;
-}
-.ant-table-column-sort, .ant-table-column-has-sorters:hover {
-  background: #2c2c2c !important;
 }
