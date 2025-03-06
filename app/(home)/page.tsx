@@ -7,7 +7,7 @@ import NoticeError from "@/components/notice/NoticeError";
 import Datalist from "@/components/dashboard/DataList";
 
 const targetLocation = "Vietnam, Ho Chi Minh City";
-const baseUrlBlockHost = process.env.NEXT_PUBLIC_BASE_API_BLOCk_HOST;
+const baseUrlBlockHost = process.env.NEXT_PUBLIC_BASE_API_BLOCK_HOST;
 const baseUrlBlockInternet = process.env.NEXT_PUBLIC_BASE_API_BLOCKING_INTERNET;
 
 export default function Home() {
