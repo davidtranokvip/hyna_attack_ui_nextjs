@@ -1,6 +1,5 @@
   "use client";
   import { motion } from "framer-motion";
-  // import { useState } from "react";
   import {
     ComposableMap,
     Geographies,
@@ -8,6 +7,8 @@
     Geography,
   } from "react-simple-maps";
   import Loading from "../elements/Loading";
+  import { Tooltip } from "antd";
+  import { useState } from "react";
 
   interface FilterItemType {
     id: number;
@@ -45,6 +46,10 @@
   };
 
   const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingInterNet, blockedCountries }) => {
+
+    const [tooltipContent, setTooltipContent] = useState('');
+    const [tooltipVisible, setTooltipVisible] = useState(false);
+    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
       return (
           <section className="h-full">
@@ -125,12 +130,17 @@
                                 geography={geo}
                                 fill={isBlocked ? "red" : "#DDD"}
                                 stroke="rgb(0, 255, 0)"
-                                // onMouseEnter={() => {
-                                //   setTooltipContent(countryName);
-                                // }}
-                                // onMouseLeave={() => {
-                                //   setTooltipContent("");
-                                // }}
+                                onMouseEnter={(event) => {
+                                  setTooltipContent(countryName);
+                                  setTooltipVisible(true);
+                                  setTooltipPosition({ x: event.clientX, y: event.clientY }); 
+                                }}
+                                onMouseLeave={() => {
+                                  setTooltipVisible(false); 
+                                }}
+                                onMouseMove={(event) => {
+                                  setTooltipPosition({ x: event.clientX, y: event.clientY }); 
+                                }}
                                 style={{
                                   default: { outline: "none" },
                                   hover: { fill: "rgb(0, 255, 0)", outline: "none" },
@@ -143,7 +153,18 @@
                       </Geographies>
                       </ZoomableGroup>
                     </ComposableMap>
-                    {/* <Tooltip anchorSelect="#country-block-site" content={tooltipContent} /> */}
+                    <Tooltip
+                      title={tooltipContent}
+                      visible={tooltipVisible}
+                      overlayStyle={{
+                        position: 'fixed', 
+                        left: tooltipPosition.x + 10, 
+                        top: tooltipPosition.y + 10, 
+                        pointerEvents: 'none', 
+                      }}
+                    >
+                      <span style={{ position: 'absolute', opacity: 0 }} />
+                      </Tooltip>
                   </>
                 </motion.div>
               ) : (
@@ -158,7 +179,7 @@
                 <div className="font-bold text-primary text-[30px] leading-[normal]">NETWORK BLOCK DETECTION</div>
                 {blockingInterNet?.length > 0 ? (
                   <motion.ul  
-                  className="mt-3 px-3"
+                  className="mt-3 px-3 leading-normal overflow-y-auto"
                   initial="hidden"
                   animate="visible"
                   variants={listVariants}
@@ -168,7 +189,7 @@
                         <div className="flex items-center justify-between">
                           <div className="text-bold text-lg text-primary leading-[normal]">{item?.name}</div>
                           <motion.div 
-                            className={`badge ${item?.statusCode === 200 ? 'bg-primary' : 'bg-danger'}`}
+                            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-white ring-1 ring-gray-500/10 ring-inset border ${item?.statusCode === 200 ? 'bg-primary' : 'bg-red'}`}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.2, duration: 0.6, ease: 'easeOut' }}

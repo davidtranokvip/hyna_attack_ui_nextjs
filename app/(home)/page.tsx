@@ -7,8 +7,8 @@ import NoticeError from "@/components/notice/NoticeError";
 import Datalist from "@/components/dashboard/DataList";
 
 const targetLocation = "Vietnam, Ho Chi Minh City";
-const baseUrl = process.env.NEXT_PUBLIC_BASE_API_LOCAL;
-const baseUrlBlock = process.env.NEXT_PUBLIC_BASE_API_BLOCKING_LOCAL;
+const baseUrlBlockHost = process.env.NEXT_PUBLIC_BASE_API_BLOCk_HOST;
+const baseUrlBlockInternet = process.env.NEXT_PUBLIC_BASE_API_BLOCKING_INTERNET;
 
 export default function Home() {
  
@@ -39,12 +39,12 @@ export default function Home() {
     }
 
     try {
-      const blockSite = await axios.get(`${baseUrlBlock}/site`, {
+      const blockSite = await axios.get(`${baseUrlBlockInternet}/site`, {
         params: {
           domain: target
         }
       });
-      const response = await axios.post(`${baseUrl}/check`, {target});
+      const response = await axios.post(`${baseUrlBlockHost}/check`, {target});
       setBlockingInterNet(blockSite?.data);
       setResult(response?.data?.data);
     } catch (error: any) {

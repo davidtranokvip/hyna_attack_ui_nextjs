@@ -196,3 +196,41 @@ td, th {
 .ant-table-column-sort, .ant-table-column-has-sorters:hover {
   background: #2c2c2c !important;
 }
+
+.bg-red {
+  background-color: red;
+}
+
+table {
+  display: table;
+  box-sizing: border-box;
+  text-indent: initial;
+  unicode-bidi: isolate;
+  line-height: normal;
+  font-weight: normal;
+  font-size: medium;
+  font-style: normal;
+  color: -internal-quirk-inherit;
+  text-align: start;
+  border-spacing: 2px;
+  white-space: normal;
+  font-variant: normal;
+}
+
+.ant-select-dropdown {
+  background-color: #202020 !important;
+  border: 1px solid #444444 !important;
+  border-radius: 5px !important;       
+}
+
+.ant-select-item-option {
+  color: rgb(0, 255, 0) !important; 
+}
+
+.ant-select-item-option-selected {
+  background-color: #202020 !important;
+}
+
+.ant-select-item-option-active {
+  background-color: #303030 !important;
+}

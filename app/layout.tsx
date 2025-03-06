@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HYNA TOOL DDOS",
-  description: "HYNA TOOL DDOS",
+  title: "HYNA SYSTEM",
+  description: "HYNA SYSTEM",
 };
 
 export default function RootLayout({
