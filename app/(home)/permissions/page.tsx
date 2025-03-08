@@ -28,11 +28,11 @@ const Page = () => {
                         setTableData(result.data);
                     }
             } catch (error) {
-                console.error("Error fetching permissions:", error);
+                console.error('Error fetching', error);
             }
         }
         fetchingData();
-    }, [form]);
+    }, []);
 
     const handlAddData = async (request: IPermissionReq) => {
         try {

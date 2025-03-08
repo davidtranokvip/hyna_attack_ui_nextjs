@@ -32,7 +32,7 @@ const Page = () => {
                         setTableData(result.data);
                     }
             } catch (error) {
-                console.error("Error fetching permissions:", error);
+                console.error('Error data', error);
             }
         }
         fetchingData();
@@ -46,7 +46,7 @@ const Page = () => {
                     setServers(result.data);
                 }
         } catch (error) {
-            console.error("Error fetching permissions:", error);
+            console.error('Error data', error);
         }
     }
     fetchingData();
@@ -58,7 +58,7 @@ const Page = () => {
                 const result = await getParentApi();
                 setParent(result.data);
             } catch (error) {
-                console.error(error);
+                console.error('Error data', error);
             }
         };
     

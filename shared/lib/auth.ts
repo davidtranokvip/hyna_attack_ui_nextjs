@@ -2,10 +2,10 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getTokenFromCookie, removeTokenCookie} from '../utils/cookies';
+import { getTokenFromCookie, removeTokenCookie } from '../utils/cookies';
 import { jwtDecode, JwtPayload } from "jwt-decode";
 
-interface IUserData extends JwtPayload{
+interface IUserData extends JwtPayload {
   nameAccount: string;
   isAdmin: boolean;
   exp?: number;
@@ -25,42 +25,69 @@ const isTokenExpired = (token: string): boolean => {
 export const useAuth = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const [token, setToken] = useState<string | null>(getTokenFromCookie());
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<IUserData | null>(null);
+  const isLoginPage = pathname === '/login';
+
   useEffect(() => {
-    const checkAuth = () => {
+    const validateAuth = () => {
       const currentToken = getTokenFromCookie();
-        const isLoginPage = pathname === '/login';
-
+      
+      if (!currentToken || isTokenExpired(currentToken)) {
         if (currentToken) {
+          removeTokenCookie();
+        }
+        setToken(null);
+        setUser(null);
+        if (!isLoginPage) {
+          router.replace('/login');
+          return;
+        }
+      } 
+      else {
+        try {
+          const decoded = jwtDecode<IUserData>(currentToken);
           setToken(currentToken);
-
-          if (isTokenExpired(currentToken)) {
-            removeTokenCookie();
-            setToken(null);
-              if (!isLoginPage) {
-                router.replace('/login');
-                return;
-              }
-            }
-          if (isLoginPage) {
-            router.replace('/');
-            return;
-          }
-          const decoded = jwtDecode<IUserData>(currentToken); 
           setUser({
             nameAccount: decoded.nameAccount,
             isAdmin: decoded.isAdmin,
           });
-        } else if (!isLoginPage) {
-          router.replace('/login');
-          return;
+          if (isLoginPage) {
+            router.replace('/');
+            return;
+          }
+        } catch (error) {
+          removeTokenCookie();
+          setToken(null);
+          setUser(null);
+          
+          if (!isLoginPage) {
+            router.replace('/login');
+            return;
+          }
         }
-        setIsLoading(false);
-      };
-    checkAuth();
-  }, [router, pathname]);
+      }
+      setIsLoading(false);
+    };
+
+    validateAuth();
+  }, [pathname]);
+
+  useEffect(() => {
+    const checkTokenInterval = setInterval(() => {
+      const currentToken = getTokenFromCookie();
+      if (currentToken && isTokenExpired(currentToken)) {
+        removeTokenCookie();
+        setToken(null);
+        setUser(null);
+        if (!isLoginPage) {
+          router.replace('/login');
+        }
+      }
+    }, 60000);
+    return () => clearInterval(checkTokenInterval);
+  }, [router, isLoginPage]);
 
   return { token, isLoading, user };
 };

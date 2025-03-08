@@ -23,6 +23,7 @@ interface IAttackServerLog {
   status: string;
   updatedAt: string;
 }
+
 export interface IAttackLog {
   id: number;
   command: string;
@@ -61,10 +62,16 @@ export interface IInitiateAttackResponse {
   errors: string[] | null;
 }
 
-export const getAttackList = async (query: IAttackQueryReq = {}) => {
-  const result = await axiosInstance.get<DataListResponse<IAttackLog>>(apiUrl, {
-    params: query,
-  });
+export interface IAttack {
+  status: string,
+  data: {
+    attack: number
+  },
+  message: string
+}
+
+export const getAttackList = async () => {
+  const result = await axiosInstance.get<DataListResponse<IAttackLog>>(apiUrl);
   return result.data;
 };
 
@@ -75,7 +82,7 @@ export const getAttackById = async (id: number) => {
 
 export const createAttack = async (body: any) => {
   const encryptedData = encryptData(body);
-  const result = await axiosInstance.post<IAttackLog>(apiUrl, {encryptedData: encryptedData.encryptedData,
+  const result = await axiosInstance.post<IAttack>(apiUrl, {encryptedData: encryptedData.encryptedData,
     encryptedKey: encryptedData.encryptedKey,
     iv: encryptedData.iv,  });
   return result.data;

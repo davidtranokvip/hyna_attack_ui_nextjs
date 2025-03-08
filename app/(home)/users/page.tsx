@@ -38,7 +38,7 @@ const Page = () => {
                 setTeamData(response.data);
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error('Error data', error);
             }
         };
         
@@ -53,7 +53,7 @@ const Page = () => {
                 setTableData(response.data);
               }
           } catch (error) {
-              console.error("Error fetching data:", error);
+              console.error('Error data', error);
           }
       };
       
@@ -68,7 +68,7 @@ const Page = () => {
                 setPermissions(response.data);
               }
           } catch (error) {
-              console.error("Error fetching data:", error);
+            console.error('Error data', error);
           }
       };
       

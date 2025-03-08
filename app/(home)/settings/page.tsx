@@ -57,7 +57,7 @@ const Page = () => {
                     setTableData(restructuredData);
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error('Error fetching', error);
             }
         };
         fetchData();

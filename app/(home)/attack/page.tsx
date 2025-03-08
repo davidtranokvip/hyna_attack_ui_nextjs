@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Select, Slider, Input, Form, Switch } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
-import SceneWrapper from '@/components/SceneWrapper';
 import { createAttack } from '@/api/attack';
 import { attackTypeSystem } from '../settings/components/data';
 import { getSettingApi, ISettingRes, ISettingItem } from '@/api/settings';
@@ -11,9 +10,14 @@ import { convertToUppercaseWords } from '@/helpers/convertText';
 import { useAuth } from '@/shared/lib/auth';
 import { getServerList, IServerItem, IServerRes } from '@/api/server';
 import { FiMonitor } from 'react-icons/fi';
+import LoadingPage from '@/components/elements/LoadingPage';
+import { useRouter } from "next/navigation";
+import NoticeError from '@/components/notice/NoticeError';
+import Image from "next/image";
 const { Option } = Select;
 
 interface IServerAttackType {
+    id: number;
     ip: string;
     name: string;
 }
@@ -27,6 +31,7 @@ const rightPanelVariants = {
 const Page = () => {
     const { user } = useAuth();
     const [form] = Form.useForm();
+    const router = useRouter();
     const [typeAttack, setTypeAttack] = useState<string>(attackTypeSystem[0].value);
     const [settings, setSettings] = useState<ISettingItem[]>([]);
     const [servers, setServers] = useState<IServerItem[]>([]);
@@ -34,7 +39,10 @@ const Page = () => {
     const [requestValue, setRequestValue] = useState<number>(0);
     const [isModeWithBlade, setIsModeWithBlade] = useState<boolean>(false);
     const [isModeDeathWork, setIsModeDeathWork] = useState<boolean>(false);
-    
+    const [isLoading, setIsLoading] = useState(true);
+    const [attackLoading, setAttackLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
+
     useEffect(() => {
         const fetchingData = async () => {
         try {
@@ -43,11 +51,11 @@ const Page = () => {
                     setServers(result.data);
                 }
         } catch (error) {
-            console.error("Error fetching permissions:", error);
+            console.error("Error fetching", error);
         }
     }
     fetchingData();
-    }, [form]);
+    }, []);
 
     const generateInitialValues = useCallback((settings: ISettingItem[]) => {
         const initialValues: Record<string, any> = {};
@@ -72,50 +80,75 @@ const Page = () => {
     }, [typeAttack]);
 
     useEffect(() => {
+        let isMounted = true;
         const fetchingData = async () => {
             try {
+                setIsLoading(true);
                 const result: ISettingRes = await getSettingApi();
-                    if(result.status === 'success') {
-                        setSettings(result.data ?? []);
-                        const initialValues = generateInitialValues(result.data ?? []);
-                        form.setFieldsValue(initialValues);
-                    }
+                if (!isMounted) return;
+                
+                if(result.status === 'success') {
+                    const settingsData = result.data || [];
+                    setSettings(settingsData);
+                    
+                    setTimeout(() => {
+                        if (isMounted && settingsData.length > 0) {
+                            try {
+                                const initialValues = generateInitialValues(settingsData);
+                                form.setFieldsValue(initialValues);
+                            } catch (error) {
+                                console.error("Error setting initial", error);
+                            }
+                        }
+                    }, 0);
+
+                    setIsLoading(false);    
+                }
             } catch (error) {
-                console.error("Error fetching settings:", error);
+                console.error("Error fetching", error);
             }
         }
 
         fetchingData();
-    }, [form, generateInitialValues]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [generateInitialValues, form]);
 
     useEffect(() => {
         const typeAttackSelect = settings.filter((setting) => setting.type === typeAttack);
         const finalSetting = [...typeAttackSelect].sort((a, b) => a.stt - b.stt);
         const modeSetting = finalSetting.find(s => s.group.toLowerCase() === "mode");
 
-        const requestSetting = finalSetting.find(s => s.group.toLowerCase() === "request");
-        if (requestSetting && form.getFieldValue(requestSetting.group)) {
-            setRequestValue(form.getFieldValue(requestSetting.group));
-        }
+        try {
 
-        const concurrentSetting = finalSetting.find(s => s.group.toLowerCase() === "concurrents");
-        if (concurrentSetting && form.getFieldValue(concurrentSetting.group)) {
-            setConcurrentValue(form.getFieldValue(concurrentSetting.group));
-        }
+            const requestSetting = finalSetting.find(s => s.group.toLowerCase() === "request");
+            if (requestSetting && form.getFieldValue(requestSetting.group)) {
+                setRequestValue(form.getFieldValue(requestSetting.group));
+            }
 
-        if (modeSetting) {
-            const modeValue = form.getFieldValue(modeSetting.group);
-            if (modeValue) {
-                const selectedMode = modeSetting.value.find(v => 
-                    v.value === modeValue || v.key === modeValue
-                );
-                if (selectedMode) {
-                    const isBladeMode = selectedMode.label.toLowerCase().includes("blade");
-                    const isDeathWorkMode = selectedMode.label.toLowerCase().includes("death sword");
-                    setIsModeWithBlade(isBladeMode);
-                    setIsModeDeathWork(isDeathWorkMode);
+            const concurrentSetting = finalSetting.find(s => s.group.toLowerCase() === "concurrents");
+            if (concurrentSetting && form.getFieldValue(concurrentSetting.group)) {
+                setConcurrentValue(form.getFieldValue(concurrentSetting.group));
+            }
+
+            if (modeSetting) {
+                const modeValue = form.getFieldValue(modeSetting.group);
+                if (modeValue) {
+                    const selectedMode = modeSetting.value.find(v => 
+                        v.value === modeValue || v.key === modeValue
+                    );
+                    if (selectedMode) {
+                        const isBladeMode = selectedMode.label.toLowerCase().includes("blade");
+                        const isDeathWorkMode = selectedMode.label.toLowerCase().includes("death sword");
+                        setIsModeWithBlade(isBladeMode);
+                        setIsModeDeathWork(isDeathWorkMode);
+                    }
                 }
             }
+        } catch (error) {
+            console.error("Error accessing", error);
         }
     }, [form, settings, typeAttack]);
 
@@ -124,7 +157,15 @@ const Page = () => {
         
         const finalSetting = [...typeAttackSelect].sort((a, b) => a.stt - b.stt);
 
-        const totalThreads = 100;
+        const concurrentsGroup = finalSetting.find(setting => 
+            setting.group.toLowerCase() === "concurrents"
+        );
+        
+        const totalThreads = concurrentsGroup 
+            ? Math.max(...concurrentsGroup.value.map(item => 
+                typeof item.value === 'string' ? parseInt(item.value, 10) : item.value
+              )) 
+            : 100;
 
         const filteredSettings = finalSetting.filter(setting => {
             const groupName = setting.group.toLowerCase();
@@ -165,10 +206,10 @@ const Page = () => {
                         <div key={setting.id} className={`flex flex-col card ${isLastItemInOddArray ? 'col-span-2' : ''}`}>
                             <div className="font-bold text-primary text-[30px] leading-[normal] mb-3">{convertToUppercaseWords(setting.group)}</div>
                                 {setting.description && (
-                                        <div 
-                                            className="text-sm text-primary mb-3" 
-                                            dangerouslySetInnerHTML={{ __html: setting.description }}
-                                        />
+                                    <div 
+                                        className="text-sm text-primary mb-3" 
+                                        dangerouslySetInnerHTML={{ __html: setting.description }}
+                                    />
                                 )}
                                 {setting.input === "select" && (
                                     <Form.Item name={setting.group}>
@@ -197,7 +238,7 @@ const Page = () => {
                                 {setting.input === "slider" && (
                                     <>
                                         <Form.Item name={setting.group}>
-                                            <Slider min={min} max={max} step={1} marks={marks} onAfterChange={(value) => {
+                                            <Slider min={min} max={max} step={1} marks={marks} onChangeComplete={(value) => {
                                                 if (isConcurrentsGroup) {
                                                     setConcurrentValue(value);
                                                 }
@@ -305,7 +346,7 @@ const Page = () => {
                                 className='custom'
                                 >
                                 {servers.map((server: IServerAttackType) => (
-                                    <Option key={server.ip} value={server.ip} label={<span>{server.name}<span style={{ color: '#999', marginLeft: 8 }}>{server.ip}</span></span>}>
+                                    <Option key={server.id} value={server.id} label={<span>{server.name}<span style={{ color: '#999', marginLeft: 8 }}>{server.ip}</span></span>}>
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
                                                 <FiMonitor className="text-xl" />
@@ -321,20 +362,28 @@ const Page = () => {
                 </div>
             )}
         </div>
-    )   
+    )
 
     const handleAttack = async(payload: any) => {
         try {
+            setAttackLoading(false);
+            if (!payload.domain || payload.domain.trim() === '') {
+                setError('ENTER SITE');
+                return;
+            }
+            setAttackLoading(true);
             const dataPayload = {
                 ...payload,
                 attack_time: payload.attack_time * 3600
             }
             const result = await createAttack(dataPayload);
             if(result.status === 'success') {
-                console.log('true');
+                setAttackLoading(false)
+                router.push(`/attack_manager?attackId=${result.data.attack}`);
             }
         } catch (error: any){
-            console.log(error);            
+            console.log('error attack', error);         
+            setAttackLoading(false);
         }
     } 
     const handleChangeTypeAttack = (value: string) => {
@@ -346,15 +395,28 @@ const Page = () => {
         return selected ? selected.label : '';
     };
 
-
     return (
-        <div className="inner-body">
-            <Form onFinish={handleAttack} form={form} layout="vertical">
+        <div className="inner-body">    
+            {error && (
+                <NoticeError error={error} setError={setError} myClass="text-5xl mb-0 leading-[3.5rem]" />
+            )}
+            {isLoading ? (
+                <LoadingPage />
+            ) : (
+            <Form form={form} onFinish={handleAttack} layout="vertical">
                 <div className="content-body" style={{ minHeight: 'auto' }}>
                     <div className="mx-auto p-6">
                         <div className="h-full flex gap-x-6">
                             <div className="h-full p-4 flex flex-col w-[525px] min-w-[525px] max-w-[525px] fixed t-0 l-0 z-10">
-                                <SceneWrapper myClass="h-[410px]" />
+                                {/* <SceneWrapper myClass="h-[410px]" /> */}
+                                <div className='w-full flex justify-center'>
+                                    <Image
+                                        src="/images/ddos.png"
+                                        width={350}
+                                        height={350}
+                                        alt="Picture of the ddos"
+                                    />
+                                </div>
                                 <div className="mb-2">
                                     <h1 className="text-center text-primary text-2xl font-extrabold mb-4">STATE: {getSelectedLabel()}</h1>
                                     <div className="flex flex-col card">
@@ -373,8 +435,8 @@ const Page = () => {
                                         </Form.Item>
                                     </div>
                                 </div>  
-                                <button type="submit" className="font-black py-3 bg-primary float-end text-black text-4xl rounded transition-all duration-300 ease-in-out active:opacity-10 hover:shadow-md hover:shadow-[#00ff00]">
-                                    ATTACK
+                                <button type="submit" disabled={attackLoading} className="font-black py-3 bg-primary float-end text-black text-4xl rounded transition-all duration-300 ease-in-out active:opacity-10 hover:shadow-md hover:shadow-[#00ff00]">
+                                {attackLoading ? 'ATTACKING...' : 'ATTACK'}
                                 </button>
                             </div>
                             <div className="right-panel" style={{ marginLeft: "525px", width: "calc(100% - 525px)"}}>
@@ -396,6 +458,7 @@ const Page = () => {
                     </div>
                 </div>
             </Form>
+            )}
         </div>
     );
 }

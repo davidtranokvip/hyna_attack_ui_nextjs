@@ -39,7 +39,7 @@ const ModalAddSetting: React.FC<IModalSettingProps> = ({ open, onClose, onSave, 
     const handleSubmit = (formValues: ISettingReq) => {
 
         if (valueKey.length === 0) {
-            console.error('Không có dữ liệu trong bảng');
+            console.error('Error data');
             return;
         }
 

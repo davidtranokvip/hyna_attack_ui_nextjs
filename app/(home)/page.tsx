@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence  } from "framer-motion";
-import SceneWrapper from "@/components/SceneWrapper";
+// import SceneWrapper from "@/components/SceneWrapper";
 import NoticeError from "@/components/notice/NoticeError";
 import Datalist from "@/components/dashboard/DataList";
 
@@ -25,7 +25,7 @@ export default function Home() {
     setBlockingInterNet([]);
 
     if (!target) {
-      console.error("Please enter a target.");
+      setError("ENTER SITE");
       return;
     }
     const cleanedUrl = target.replace(/^https?:\/\//, "").split("/")[0].toLowerCase();
@@ -48,10 +48,9 @@ export default function Home() {
       setBlockingInterNet(blockSite?.data);
       setResult(response?.data?.data);
     } catch (error: any) {
-      console.log(error);
+      console.error('error', error)
       setError("ERROR DURING SEARCH");
     }
-    
   };
 
   const filteredAndSorted = result && result.length > 0
@@ -84,7 +83,6 @@ export default function Home() {
     .filter((item: any) => item.statusCode !== 200)
   const description = `Phân tích hoàn tất: Website ${domain} đang ${blockedCountries.length > 10 ? 'chặn' : 'mở'} trên phạm vi quốc tế nhưng ${netWorks.length > 0 ? `bị blocked từ các nhà mạng ${blockedNetworks}` : `vẫn hoạt động bình thường từ các nhà mạng` } tại VIỆT NAM _`;
 
-  console.log(blockingInterNet);
   return (
     <>
       {error && (
@@ -101,7 +99,12 @@ export default function Home() {
                 }`}
                 transition={{ duration: 0.5, ease: ["easeOut", "easeIn"], }}
               >
-                <SceneWrapper myClass="h-[450px] mb-3" />
+                  {/* <SceneWrapper myClass="h-[450px] mb-3" /> */}
+                  <h3 className="title_login h-[450px] hero glitch layers flex items-center">
+                    <span>
+                      HYNA SYSTEM
+                    </span>
+                  </h3>
                   <AnimatePresence>
                     {isSearched && (
                       <motion.h2

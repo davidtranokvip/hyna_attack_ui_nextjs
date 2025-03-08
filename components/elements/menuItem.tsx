@@ -1,4 +1,5 @@
-import { IoLogoBuffer, IoMdSettings } from "react-icons/io";
+import { IoMdSettings } from "react-icons/io";
+// import { IoLogoBuffer, IoMdTime } from "react-icons/io";
 import { GiTeamIdea } from "react-icons/gi";
 import { FaUsers, FaUserTag } from "react-icons/fa";
 import { RiSwordFill } from "react-icons/ri";
@@ -11,11 +12,16 @@ export const menuItems = [
     title: 'Users',
     icon: <FaUsers />
   },
-    {
-    path: 'attack_log',
-    title: 'ATTACK LOG',
-    icon: <IoLogoBuffer />
-  },
+  // {
+  //   path: 'attack_log',
+  //   title: 'ATTACK LOG',
+  //   icon: <IoLogoBuffer />
+  // },
+  // {
+  //   path: 'user_log',
+  //   title: 'USER LOG',
+  //   icon: <IoMdTime />
+  // },
   {
     path: 'permissions',
     title: 'PERMISSIONS',
