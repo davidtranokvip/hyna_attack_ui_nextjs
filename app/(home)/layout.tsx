@@ -4,6 +4,8 @@ import { Layout } from "antd";
 import HeaderAttack from "@/components/elements/HeaderAttack";
 import SidebarAttack from "@/components/elements/SiderAttack";
 import NavHeader from "@/components/elements/NavHeader";
+import { useAuth } from "@/shared/lib/auth";
+import LoadingPage from "@/components/elements/LoadingPage";
 const { Header, Content, Sider } = Layout;
 
 const layoutStyle = {
@@ -60,6 +62,12 @@ export default function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const { isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
       <Layout style={layoutStyle}>

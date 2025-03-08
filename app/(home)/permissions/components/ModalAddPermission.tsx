@@ -14,8 +14,8 @@ const ModalAddPermission: React.FC<IModalPermissionProps> = ({ open, onClose, on
     const handleSubmit = async (values: IPermissionReq) => {
         try {
             await onSave(values);
-        } catch (errors) {
-            console.error(errors);
+        } catch (error) {
+            console.error('Error fetching', error);
         }
     };
 
@@ -25,7 +25,6 @@ const ModalAddPermission: React.FC<IModalPermissionProps> = ({ open, onClose, on
             errors: []
         }]);
     };
-
 
     return (
         <Modal 

@@ -48,7 +48,6 @@ const ModalEditSetting: React.FC<IModalSettingProps> = ({ error, open, item, onC
         if (item && item.value) {
             try {
                 const result = (Array.isArray(item.value) ? item.value.flat() : []).map((valueItem, index) => {
-                    console.log("Value item:", valueItem);      
                     return {
                         id: index + 1,
                         key: valueItem.key || '',
@@ -65,7 +64,7 @@ const ModalEditSetting: React.FC<IModalSettingProps> = ({ error, open, item, onC
                     group: item.group
                 });
             } catch (error) {
-                console.error('Error parsing value:', error);
+                console.error('Error data', error);
             }
         }
     }, [item, form, open]);
@@ -74,7 +73,7 @@ const ModalEditSetting: React.FC<IModalSettingProps> = ({ error, open, item, onC
     const handleSubmit = (formValues: ISettingItem) => {
 
         if (valueKey.length === 0) {
-            console.error('Không có dữ liệu trong bảng');
+            console.error('Error data');
             return;
         }
 

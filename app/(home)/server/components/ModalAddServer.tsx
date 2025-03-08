@@ -14,8 +14,8 @@ const ModalAddServer: React.FC<ModalServerProps> = ({ open, onClose, onSave, for
     const handleSubmit = async (values: IServerReq) => {
         try {
             await onSave(values);
-        } catch (errors) {
-            console.error(errors);
+        } catch (error) {
+            console.error('Error fetching', error);
         }
     };
 

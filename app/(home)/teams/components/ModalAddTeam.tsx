@@ -30,8 +30,8 @@ const ModalAddTeam: React.FC<IModalAddProps> = ({ open, onClose, onSave, form, t
     const handleSubmit = async (values: ITeamReq) => {
         try {
             await onSave(values);
-        } catch (errors) {
-            console.error(errors);
+        } catch (error) {
+            console.error('Error data', error);
         }
     }; 
 

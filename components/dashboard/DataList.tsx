@@ -189,7 +189,7 @@
                         <div className="flex items-center justify-between">
                           <div className="text-bold text-lg text-primary leading-[normal]">{item?.name}</div>
                           <motion.div 
-                            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium text-white ring-1 ring-gray-500/10 ring-inset border ${item?.statusCode === 200 ? 'bg-primary' : 'bg-red'}`}
+                            className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-gray-500/10 ring-inset border ${item?.statusCode === 200 ? 'bg-primary text-black' : 'bg-red text-white'}`}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.2, duration: 0.6, ease: 'easeOut' }}

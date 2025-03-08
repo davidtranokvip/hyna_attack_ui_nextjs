@@ -7,7 +7,7 @@ import { Form, FormProps, Input } from "antd";
 import styled from "styled-components";
 import NoticeError from "@/components/notice/NoticeError";
 import NoticePass from "@/components/notice/NoticePass";
-import SceneWrapper from "@/components/SceneWrapper";
+// import SceneWrapper from "@/components/SceneWrapper";
 import { setTokenCookie } from "@/shared/utils/cookies";
 
 export default function Page() {
@@ -53,14 +53,14 @@ export default function Page() {
                 <div className="pt-4 text-2xl">
                     <h2>CONNECTION ESTABLISHED</h2>
                 </div>  
-                <SceneWrapper myClass="h-[410px]" />
+                {/* <SceneWrapper myClass="h-[410px]" /> */}
                 <div className="text-center">
-                    <h3 className="title_login hero glitch layers">
+                    <h1 className="font-family title_login mt-[240px] mb-[90] text-8xl hero glitch layers flex items-center">
                         <span>
-                            HYNA SYSTEM
+                        HYNA SYSTEM
                         </span>
-                    </h3>
-                    <div className="p-5 flex justify-center">
+                    </h1>
+                    <div className="p-5 flex justify-center mb-16">
                         <StyledForm form={form} onFinish={handleSubmit} layout="horizontal">
                             <Form.Item label="USERNAME" name="nameAccount" rules={[{ message: "User not found!" }]} >
                                 <Input size='large' autoComplete="off"/>

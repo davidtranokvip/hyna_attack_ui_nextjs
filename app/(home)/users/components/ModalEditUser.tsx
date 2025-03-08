@@ -58,7 +58,6 @@ const ModalEditUser: React.FC<IModalUserProps> = ({ error, open, onClose, onSave
             setSelectedPermissionIds(prev => prev.filter(item => item.id !== permissionId));
         }
     };
-    console.log(selectedPermissionIds);
     const isPermissionSelected = (permissionId: number): boolean => {
         return selectedPermissionIds.some(item => item.id === permissionId);
     };

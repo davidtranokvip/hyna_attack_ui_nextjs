@@ -18,7 +18,6 @@ interface IModalUserProps {
 
 const ModalAddUser: React.FC<IModalUserProps> = ({ open, onClose, onSave, form, permissions, teamData }) => {
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<IPermissionId[]>([]);
-    console.log(selectedPermissionIds)
 
     useEffect(() => {
         if (!open) {
