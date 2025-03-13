@@ -3,56 +3,37 @@
 
 import React, { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { Button, Card, Empty, Table } from "antd";
+import { Button, Card, Empty, Table, Badge, Statistic, Row, Col } from "antd";
 import { terminateServerAttack } from "@/api/attack";
 import { useSearchParams } from 'next/navigation';
 import CountdownTimer from "@/components/elements/CountDownTimer";
-import ParticlesAnimation from "@/components/elements/Backgroun";
-
+import ParticlesAnimation from "@/components/elements/ParticlesAnimation";
+import {
+    FaTrash,
+    FaNetworkWired,
+    FaShieldAlt,
+    FaCrosshairs,
+  } from "react-icons/fa";
+  import { motion } from "framer-motion";
+  
 interface LogMessage {
-  data: {
-    target: string;
-    attack_time: string;
-    attack_id: number;
-    thread: number;
-  }[];
+data: {
+    domain: string;
+    attack_time: number;
+    attack: number;
+    server: string;
+    };
   status: string;
   message: string;
 }
 
 interface TableData {
-  target: string;
-  attack_time: string;
-  attack_id: number;
-  thread: number;
+    id: string;
+    domain: string;
+    attack_time: number;
+    attack: number;
+    server: string;
 }
-
-const data: LogMessage["data"] = [
-  {
-      attack_id: 2,
-      target: 'https:://789bet.vn',
-      thread: 30,
-      attack_time: '2h',
-  },
-  {
-      attack_id: 2,
-      target: 'https:://789bet.vn',
-      thread: 30,
-      attack_time: '2h',
-  },
-  {
-      attack_id: 2,
-      target: 'https:://789bet.vn',
-      thread: 30,
-      attack_time: '2h',
-  },
-  {
-      attack_id: 2,
-      target: 'https:://789bet.vn',
-      thread: 30,
-      attack_time: '2h',
-  },
-]
 
 const Page = () => {
 
@@ -61,17 +42,15 @@ const Page = () => {
   const [logsByServer, setLogsByServer] = useState<Map<string, LogMessage[]>>(
     new Map()
   );
-  const [tableData, setTableData] = useState<TableData[]>(data);
+  const [tableData, setTableData] = useState<TableData[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  
-  const handleTerminate = async(target: string) => {
-    try {
-      console.log(target);
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  const [isConnecting, setIsConnecting] = useState(true);
+  const [scheduledTasks, setScheduledTasks] = useState({
+    current: 0,
+    total: 100,
+  });
+  const [presetTasks, setPresetTasks] = useState({ current: 0, total: 100 });
+
   const columns = [
     {
       title: 'Site',
@@ -98,98 +77,108 @@ const Page = () => {
         key: '',
         className: "bg-card py-2 text-primary text-[1.125rem] leading-[normal] text-center",
         render: (_: any, record: TableData) => (
-          <Button onClick={() => handleTerminate(record.target)}>CANCEL</Button>
+          <Button onClick={() => handleTerminate(record.server)}>CANCEL</Button>
       ),
     },
 ];
 
-  // useEffect(() => {
-  //   const newTableData: TableData[] = [];
+  useEffect(() => {
+    const newTableData: TableData[] = [];
     
-  //   logsByServer.forEach((messages) => {
-  //     if (messages.length > 0) {
-  //       const firstMessage = messages[0];
+    logsByServer.forEach((messages) => {
+      if (messages.length > 0) {
+        const firstMessage = messages[0];
         
-  //       newTableData.push({
-  //         id: `${firstMessage.data.domain}-${firstMessage.data.attack}`,
-  //         domain: firstMessage.data.domain,
-  //         attack_time: firstMessage.data.attack_time,
-  //         attack: firstMessage.data.attack,
-  //         server: firstMessage.data.server
-  //       });
-  //     }
-  //   });
+        newTableData.push({
+          id: `${firstMessage.data.domain}-${firstMessage.data.attack}`,
+          domain: firstMessage.data.domain,
+          attack_time: firstMessage.data.attack_time,
+          attack: firstMessage.data.attack,
+          server: firstMessage.data.server
+        });
+      }
+    });
     
-  //   setTableData(newTableData);
-  // }, [logsByServer]);
+    setTableData(newTableData);
+  }, [logsByServer]);
 
-  // useEffect(() => {
-  //   try {
-  //     const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
-  //       reconnection: true,
-  //       timeout: 10000,
-  //       transports: ['websocket']
-  //     });
+  useEffect(() => {
+    try {
+      const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL, {
+        reconnection: true,
+        timeout: 10000,
+        transports: ['websocket']
+      });
 
-  //     newSocket.on("connect", () => {
-  //       setIsConnecting(false);
-  //     });
+      newSocket.on("connect", () => {
+        setIsConnecting(false);
+      });
 
-  //     newSocket.on("connect_error", (error) => {
-  //       console.error('socket', error)
-  //       setIsConnecting(false);
-  //     });
+      newSocket.on("connect_error", (error) => {
+        console.error('socket', error)
+        setIsConnecting(false);
+      });
 
-  //     setSocket(newSocket);
+      setSocket(newSocket);
 
-  //     return () => {
-  //       newSocket.disconnect();
-  //     };
-  //   } catch (error) {
-  //     console.error('socket', error)
-  //     setIsConnecting(false);
-  //   }
-  // }, []);
+      return () => {
+        newSocket.disconnect();
+      };
+    } catch (error) {
+      console.error('socket', error)
+      setIsConnecting(false);
+    }
+  }, []);
 
-  // useEffect(() => {
-  //   if (!socket) return;
+  useEffect(() => {
+    if (!socket) return;
 
-  //   socket.on("log_message", (message: LogMessage) => {
-  //     const domain = message.data.domain;
+    socket.on("log_message", (message: LogMessage) => {
+        const domain = message.data.domain;
+  
+        setLogsByServer((prevLogs) => {
+          const newLogs = new Map(prevLogs);
+          const serverLogs = newLogs.get(domain) || [];
+          newLogs.set(domain, [...serverLogs, message]);
+          return newLogs;
+        });
+      });
 
-  //     setLogsByServer((prevLogs) => {
-  //       const newLogs = new Map(prevLogs);
-  //       const serverLogs = newLogs.get(domain) || [];
-  //       newLogs.set(domain, [...serverLogs, message]);
-  //       return newLogs;
-  //     });
-  //   });
+    return () => {
+      socket.off("log_message");
+    };
+  }, [socket]);
 
-  //   return () => {
-  //     socket.off("log_message");
-  //   };
-  // }, [socket]);
-
-  // const handleTerminate = async (server: string) => {
-  //   if (!attackId) {
-  //     console.error("No attack ID available");
-  //     return;
-  //   }
-  //   try {
-  //     await terminateServerAttack(parseInt(attackId), server);
-  //     setLogsByServer((prevLogs) => {
-  //       const newLogs = new Map(prevLogs);
-  //       newLogs.delete(server);
-  //       return newLogs;
-  //     });
-  //   } catch (error) {
-  //     setTableData([]);
-  //     console.error('error data', error);
-  //   }
-  // };
+  const handleTerminate = async (server: string) => {
+    if (!attackId) {
+      console.error("No attack ID available");
+      return;
+    }
+    try {
+      await terminateServerAttack(parseInt(attackId), server);
+      setLogsByServer((prevLogs) => {
+        const newLogs = new Map(prevLogs);
+        newLogs.delete(server);
+        return newLogs;
+      });
+    } catch (error) {
+      setTableData([]);
+      console.error("error data", error);
+    }
+  };
   
   const emptyData = {
-    emptyText: <Empty className="h-full"/>
+    emptyText: (
+      <Empty
+        className="h-full py-12"
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+        description={
+          <span className="text-gray-400">
+            No active attacks. System is idle.
+          </span>
+        }
+      />
+    ),
   };
 
   return (
@@ -197,6 +186,54 @@ const Page = () => {
       <div className="content-body h-full relative">
         <ParticlesAnimation />
         <div className="mx-auto p-8 relative flex justify-center items-center h-full w-full">
+        <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-3/4 mb-6"
+          >
+            <Row gutter={16}>
+              <Col span={8}>
+                <Card bordered={false} className="bg-gray-800 text-white">
+                  <Statistic
+                    title={
+                      <span className="text-gray-300">Active Attacks</span>
+                    }
+                    value={tableData.length}
+                    prefix={<FaCrosshairs className="mr-2 text-red-500" />}
+                    valueStyle={{ color: "#ff4d4f" }}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card bordered={false} className="bg-gray-800 text-white">
+                  <Statistic
+                    title={<span className="text-gray-300">Scheduled</span>}
+                    value={`${scheduledTasks.current}/${scheduledTasks.total}`}
+                    prefix={<FaNetworkWired className="mr-2 text-blue-500" />}
+                    valueStyle={{ color: "#1890ff" }}
+                  />
+                </Card>
+              </Col>
+              <Col span={8}>
+                <Card bordered={false} className="bg-gray-800 text-white">
+                  <Statistic
+                    title={<span className="text-gray-300">Preset</span>}
+                    value={`${presetTasks.current}/${presetTasks.total}`}
+                    prefix={<FaShieldAlt className="mr-2 text-yellow-500" />}
+                    valueStyle={{ color: "#faad14" }}
+                  />
+                </Card>
+              </Col>
+            </Row>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="w-3/4"
+          >
           <Card title='ATTACK MANAGER' className="w-3/4" >
             <div className="h-full flex flex-col">
               <Table
@@ -211,6 +248,13 @@ const Page = () => {
               />
             </div>
           </Card>
+          </motion.div>
+
+            <div className="mt-6 text-gray-500 text-sm">
+            {isConnecting
+                ? "Establishing secure connection..."
+                : "Secure connection established"}
+            </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Select, Slider, Input, Form, Switch } from 'antd';
+import { Select, Slider, Input, Form, Switch, Modal } from "antd";
 import { motion, AnimatePresence } from 'framer-motion';
 import { createAttack } from '@/api/attack';
 import { attackTypeSystem } from '../settings/components/data';
@@ -14,6 +14,7 @@ import LoadingPage from '@/components/elements/LoadingPage';
 import { useRouter } from "next/navigation";
 import NoticeError from '@/components/notice/NoticeError';
 import SceneWrapper from '@/components/SceneWrapper';
+import { FiCheckCircle, FiAlertTriangle, FiLoader } from "react-icons/fi";
 const { Option } = Select;
 
 interface IServerAttackType {
@@ -43,6 +44,11 @@ const Page = () => {
     const [attackLoading, setAttackLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     
+    const [successModalVisible, setSuccessModalVisible] =
+    useState<boolean>(false);
+    const [errorModalVisible, setErrorModalVisible] = useState<boolean>(false);
+    const [modalMessage, setModalMessage] = useState<string>("");
+
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
@@ -382,28 +388,63 @@ const Page = () => {
         </div>
     );
 
-    const handleAttack = async(payload: any) => {
+    // const handleAttack = async(payload: any) => {
+    //     try {
+    //         setAttackLoading(false);
+    //         if (!payload.domain || payload.domain.trim() === '') {
+    //             setError('ENTER SITE');
+    //             return;
+    //         }
+    //         setAttackLoading(true);
+    //         const dataPayload = {
+    //             ...payload,
+    //             attack_time: payload.attack_time * 3600
+    //         }
+    //         const result = await createAttack(dataPayload);
+    //         if(result.status === 'success') {
+    //             setAttackLoading(false)
+    //             router.push(`/attack_manager?attackId=${result.data.attack}`);
+    //         }
+    //     } catch (error: any){
+    //         console.log('error attack', error);         
+    //         setAttackLoading(false);
+    //     }
+    // } 
+
+    const handleAttack = async (payload: any) => {
         try {
+          setAttackLoading(false);
+          if (!payload.domain || payload.domain.trim() === "") {
+            setError("ENTER SITE");
+            return;
+          }
+          setAttackLoading(true);
+          const dataPayload = {
+            ...payload,
+            attack_time: payload.attack_time * 3600,
+          };
+          const result = await createAttack(dataPayload);
+          if (result.status === "success") {
             setAttackLoading(false);
-            if (!payload.domain || payload.domain.trim() === '') {
-                setError('ENTER SITE');
-                return;
-            }
-            setAttackLoading(true);
-            const dataPayload = {
-                ...payload,
-                attack_time: payload.attack_time * 3600
-            }
-            const result = await createAttack(dataPayload);
-            if(result.status === 'success') {
-                setAttackLoading(false)
-                router.push(`/attack_manager?attackId=${result.data.attack}`);
-            }
-        } catch (error: any){
-            console.log('error attack', error);         
-            setAttackLoading(false);
+            setSuccessModalVisible(true);
+            setModalMessage("Attack initiated successfully!");
+            // Delay before redirecting to allow the user to see the success message
+            setTimeout(() => {
+              setSuccessModalVisible(false);
+              router.push(`/attack_manager?attackId=${result.data.attack}`);
+            }, 1500);
+          }
+        } catch (error: any) {
+          console.log("error attack", error);
+          setAttackLoading(false);
+          setErrorModalVisible(true);
+          setModalMessage(
+            error?.response?.data?.message ||
+              "Failed to initiate attack. Please try again."
+          );
         }
-    } 
+      };
+
     const handleChangeTypeAttack = (value: string) => {
         setTypeAttack(value);
     };
@@ -418,6 +459,46 @@ const Page = () => {
             {error && (
                 <NoticeError error={error} setError={setError} myClass="text-5xl mb-0 leading-[3.5rem]" />
             )}
+
+        <Modal
+                open={successModalVisible}
+                footer={null}
+                closable={false}
+                centered
+                maskClosable={false}
+                className="notification-modal success-modal"
+                bodyStyle={{ padding: "20px", textAlign: "center" }}
+            >
+                <div className="flex flex-col items-center">
+                <FiCheckCircle className="text-[#00ff00] text-5xl mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">Success</h3>
+                <p className="text-gray-300">{modalMessage}</p>
+                <p className="text-gray-400 text-sm mt-2">Redirecting...</p>
+                </div>
+            </Modal>
+
+            {/* Error Modal */}
+            <Modal
+                open={errorModalVisible}
+                footer={null}
+                onCancel={() => setErrorModalVisible(false)}
+                centered
+                className="notification-modal error-modal"
+                bodyStyle={{ padding: "20px", textAlign: "center" }}
+            >
+                <div className="flex flex-col items-center">
+                <FiAlertTriangle className="text-red-500 text-5xl mb-4" />
+                <h3 className="text-xl font-bold text-white mb-2">Attack Failed</h3>
+                <p className="text-gray-300">{modalMessage}</p>
+                <button
+                    onClick={() => setErrorModalVisible(false)}
+                    className="mt-4 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded"
+                >
+                    Close
+                </button>
+                </div>
+            </Modal>
+            
             {isLoading ? (
                 <LoadingPage />
             ) : (
@@ -446,7 +527,11 @@ const Page = () => {
                                     </div>
                                 </div>  
                                 <button type="submit" disabled={attackLoading} className="font-black py-3 bg-primary float-end text-black text-4xl rounded transition-all duration-300 ease-in-out active:opacity-10 hover:shadow-md hover:shadow-[#00ff00]">
-                                {attackLoading ? 'ATTACKING...' : 'ATTACK'}
+                                {attackLoading ? (
+                                    <FiLoader className="animate-spin mr-2" />
+                                    ) : (
+                                    "ATTACK"
+                                )}
                                 </button>
                             </div>
                             <div className="right-panel" style={{ marginLeft: "525px", width: "calc(100% - 525px)"}}>
