@@ -8,12 +8,12 @@ import { attackTypeSystem } from '../settings/components/data';
 import { getSettingApi, ISettingRes, ISettingItem } from '@/api/settings';
 import { convertToUppercaseWords } from '@/helpers/convertText';
 import { useAuth } from '@/shared/lib/auth';
-import { getServerList, IServerItem, IServerRes } from '@/api/server';
+import { IServerItem, IServerRes, serverApi } from '@/api/server';
 import { FiMonitor } from 'react-icons/fi';
 import LoadingPage from '@/components/elements/LoadingPage';
 import { useRouter } from "next/navigation";
 import NoticeError from '@/components/notice/NoticeError';
-import Image from "next/image";
+import SceneWrapper from '@/components/SceneWrapper';
 const { Option } = Select;
 
 interface IServerAttackType {
@@ -42,11 +42,25 @@ const Page = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [attackLoading, setAttackLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+    
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkScreenSize = () => {
+        setIsMobile(window.innerWidth <= 1280);
+        };
+
+        checkScreenSize();
+
+        window.addEventListener('resize', checkScreenSize);
+
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     useEffect(() => {
         const fetchingData = async () => {
         try {
-            const result: IServerRes = await getServerList();
+            const result: IServerRes = await serverApi.getAll();
                 if(result.status === 'success') {
                     setServers(result.data);
                 }
@@ -122,7 +136,6 @@ const Page = () => {
         const modeSetting = finalSetting.find(s => s.group.toLowerCase() === "mode");
 
         try {
-
             const requestSetting = finalSetting.find(s => s.group.toLowerCase() === "request");
             if (requestSetting && form.getFieldValue(requestSetting.group)) {
                 setRequestValue(form.getFieldValue(requestSetting.group));
@@ -203,8 +216,8 @@ const Page = () => {
                     const max = Math.max(...values);
                  
                     return (
-                        <div key={setting.id} className={`flex flex-col card ${isLastItemInOddArray ? 'col-span-2' : ''}`}>
-                            <div className="font-bold text-primary text-[30px] leading-[normal] mb-3">{convertToUppercaseWords(setting.group)}</div>
+                        <div key={setting.id} className={`flex flex-col card ${isLastItemInOddArray ? 'col-span-2' : ''} ${isMobile ? 'col-span-2' : ''}`}>
+                            <div className={`font-bold text-primary ${isMobile ? 'text-xl' : 'text-[30px]'} leading-normal mb-2`}>{convertToUppercaseWords(setting.group)}</div>
                                 {setting.description && (
                                     <div 
                                         className="text-sm text-primary mb-3" 
@@ -213,7 +226,7 @@ const Page = () => {
                                 )}
                                 {setting.input === "select" && (
                                     <Form.Item name={setting.group}>
-                                        <Select size='large' onChange={(value) => {
+                                        <Select size={isMobile ? 'middle' : 'large'} onChange={(value) => {
                                         if (isModeGroup) {
                                             const selectedMode = setting.value.find(v => 
                                                 v.value === value || v.key === value
@@ -238,7 +251,7 @@ const Page = () => {
                                 {setting.input === "slider" && (
                                     <>
                                         <Form.Item name={setting.group}>
-                                            <Slider min={min} max={max} step={1} marks={marks} onChangeComplete={(value) => {
+                                            <Slider min={min} max={isConcurrentsGroup && !user?.isAdmin ? Math.min(max, user?.thread || max) : max}  step={1} marks={marks} onChangeComplete={(value) => {
                                                 if (isConcurrentsGroup) {
                                                     setConcurrentValue(value);
                                                 }
@@ -248,12 +261,16 @@ const Page = () => {
                                             }}/>
                                         </Form.Item>
                                         {isConcurrentsGroup && (
-                                            <div className="text-primary text-xl">
-                                                Remaining threads: {totalThreads - concurrentValue}
+                                            <div className={`text-primary ${isMobile ? 'text-base' : 'text-xl'}`}>
+                                                 {user?.isAdmin ? (
+                                                    <div>Remaining threads: {totalThreads - concurrentValue}</div>
+                                                ) : (
+                                                    <div>Remaining threads: {Math.max(0, (user?.thread || 0) - concurrentValue)}</div>
+                                                )}
                                             </div>
                                         )}
                                         {isRequestGroup && (
-                                            <div className="mt-3 flex justify-between items-center">
+                                            <div className={`mt-3 grid  gap-2 ${isMobile ? 'grid-cols-1' : 'grid-cols-3'}`}>
                                                 {setting.value.map((option) => {
 
                                                     const buttonValue = typeof option.value === 'string' ? 
@@ -327,29 +344,30 @@ const Page = () => {
     }   
 
     const RightPanelContent = () => (
-        <div className="h-full grid gap-4" style={{ gridTemplateColumns: 'repeat(2, 1fr)'}}>
+        <div className={`h-full grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
             {renderGroupedSetting()}
-
             {user?.isAdmin  && (
-                    <div className="flex flex-col card col-span-2">
+                   <div className="flex flex-col card col-span-2">
                     <>
-                        <div className="font-bold text-primary text-[30px] leading-[normal] mb-2">SERVERS</div>
+                        <div className={`font-bold text-primary ${isMobile ? 'text-xl' : 'text-[30px]'} leading-normal mb-2`}>
+                            SERVERS
+                        </div>
                         <div className="text-sm text-primary mb-3">
                             MODE: <code>DEVIL</code>
                         </div>
                         <Form.Item name="servers" className="mb-0">
                             <Select
                                 mode="multiple"
-                                size='large'
+                                size={isMobile ? 'middle' : 'large'}
                                 placeholder="Server enter"
                                 optionLabelProp="label"
-                                className='custom'
+                                className="custom"
                                 >
                                 {servers.map((server: IServerAttackType) => (
-                                    <Option key={server.id} value={server.id} label={<span>{server.name}<span style={{ color: '#999', marginLeft: 8 }}>{server.ip}</span></span>}>
+                                    <Option size={isMobile ? 'middle' : 'large'} key={server.id} value={server.id} label={<span>{server.name}<span style={{ color: '#999', marginLeft: 8 }}>{server.ip}</span></span>}>
                                         <div className="flex flex-col">
                                             <div className="flex items-center gap-2">
-                                                <FiMonitor className="text-xl" />
+                                                <FiMonitor className={isMobile ? 'text-base' : 'text-xl'} />
                                                 <span>{server.name}</span>
                                             </div>
                                         <div className="text-xs text-gray-500">{server.ip}</div>
@@ -362,7 +380,7 @@ const Page = () => {
                 </div>
             )}
         </div>
-    )
+    );
 
     const handleAttack = async(payload: any) => {
         try {
@@ -408,15 +426,7 @@ const Page = () => {
                     <div className="mx-auto p-6">
                         <div className="h-full flex gap-x-6">
                             <div className="h-full p-4 flex flex-col w-[525px] min-w-[525px] max-w-[525px] fixed t-0 l-0 z-10">
-                                {/* <SceneWrapper myClass="h-[410px]" /> */}
-                                <div className='w-full flex justify-center'>
-                                    <Image
-                                        src="/images/ddos.png"
-                                        width={350}
-                                        height={350}
-                                        alt="Picture of the ddos"
-                                    />
-                                </div>
+                                <SceneWrapper />
                                 <div className="mb-2">
                                     <h1 className="text-center text-primary text-2xl font-extrabold mb-4">STATE: {getSelectedLabel()}</h1>
                                     <div className="flex flex-col card">

@@ -5,10 +5,10 @@ const attackTypeSystem: ISelectDataType[] = [
         value: 'hyna_warrior',
         label: 'HYNA WARRIOR',
     },
-    {
-        value: 'hyna_valkyra',
-        label: 'HYNA VALKYRA',
-    }
+        // {
+        //     value: 'hyna_valkyra',
+        //     label: 'HYNA VALKYRA',
+        // }
 ];
 
 

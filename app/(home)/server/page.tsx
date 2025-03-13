@@ -1,12 +1,16 @@
 'use client';
 
-import { deleteServer, getServerList, IServerReq, IServerItem, IServerRes, createServer, updateServer } from "@/api/server";
+import { serverApi, IServerReq, IServerItem, IServerRes } from "@/api/server";
 import { Button, Card, Empty, Form, Popconfirm, Space, Table } from "antd";
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import ModalAddServer from "./components/ModalAddServer";
 import ModalEditServer from "./components/ModalEditServer";
+import { IoEyeOff, IoEyeOffOutline } from "react-icons/io5";
 
+interface PasswordVisibility {
+    [key: number]: boolean;
+}
 const Page = () => {
 
     const [form] = Form.useForm<IServerReq>();
@@ -14,33 +18,39 @@ const Page = () => {
     const [openAdd, setOpenAdd] = useState<boolean>(false);
     const [openEdit, setOpenEdit] = useState<boolean>(false);
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState<boolean>();
     const [editingItem, setEditingItem] = useState<IServerItem | undefined>();
-
+     const [visiblePasswords, setVisiblePasswords] = useState<PasswordVisibility>({});
     const showModalEdit = (record: IServerItem) => {
         setEditingItem(record);
         setOpenEdit(true);
     };
     
-    useEffect(() => {
-        const fetchingData = async () => {
-            try {
-                const result: IServerRes = await getServerList();
-                    if(result.status === 'success') {
-                        setTableData(result.data);
-                    }
-            } catch (error) {
-                console.error('Error fetching', error);
-            }
+    const fetchingData = async () => {
+        try {
+            setLoading(true);
+            const result: IServerRes = await serverApi.getAll();
+                if(result.status === 'success') {
+                    setLoading(false);
+                    setTableData(result.data);
+                }
+        } catch (error) {
+            console.error('Error fetching', error);
         }
+    }
+
+    useEffect(() => {
         fetchingData();
-    }, [form]);
+    }, []);
 
     const handlAddData = async (request: IServerReq) => {
         try {
-            const result = await createServer(request);
+            const result = await serverApi.create(request);
             if(result?.status === 'success') {
                 setOpenAdd(false);    
                 form.resetFields();
+
+                await fetchingData();
             }
         } catch (error: any) {
             Object.keys(error).forEach((field) => {
@@ -54,9 +64,11 @@ const Page = () => {
 
     const handleUpdate = async (request: IServerItem) => {
         try {
-            const result = await updateServer(request);
+            const result = await serverApi.update(request);
             if (result.status === 'success') {
                 setOpenEdit(false);
+
+                await fetchingData();
             }   
         } catch (error: any) {
             setError(error);
@@ -65,7 +77,7 @@ const Page = () => {
 
     const handleDelete = async (id: number) => {
         try {
-            const results = await deleteServer(id);
+            const results = await serverApi.delete(id);
             if(results.status === 'success') {
                 setTableData(prev => prev.filter(item => item.id !== id));
             }
@@ -74,11 +86,25 @@ const Page = () => {
         }
     }
 
+    const togglePasswordVisibility = (id: number) => {
+        setVisiblePasswords(prev => ({
+          ...prev,
+          [id]: !prev[id]
+        }));
+      };
+    
+
     const columns = [
         {
           title: 'Name',
           dataIndex: 'name',
           key: 'name',
+          className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+        },
+        {
+          title: 'Thread',
+          key: 'thread',
+          dataIndex: 'thread',
           className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
         },
         {
@@ -98,6 +124,20 @@ const Page = () => {
           key: 'password',
           dataIndex: 'password',
           className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+          render: (_: any, record: IServerItem) => (
+                <Space size="middle">
+                    <span>{record.id && visiblePasswords[record.id] ? record.password : '••••••••'}</span>
+                    <div
+                    onClick={() => record.id && togglePasswordVisibility(record.id)}
+                    className="cursor-pointer"
+                    >
+                    {record.id && visiblePasswords[record.id] ? 
+                        <IoEyeOff /> : 
+                        <IoEyeOffOutline />
+                    }
+                    </div>
+                </Space>
+                )
         },
         {
           title: 'Actions',
@@ -116,7 +156,7 @@ const Page = () => {
                         <Button size="large" className="bg-primary float-end text-black">DELETE</Button>
                     </Popconfirm>
                 </Space>
-          ),
+            ),
         },
     ];
 
@@ -147,10 +187,11 @@ const Page = () => {
                                 columns={columns}
                                 dataSource={tableData}
                                 pagination={false}
+                                loading={loading}
                                 rowKey="id"
                                 scroll={{ y: 24 * 24}}
                                 locale={emptyData}
-                                style={{ tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
+                                style={{ background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
                                 />
                         </Card>
                     </div>

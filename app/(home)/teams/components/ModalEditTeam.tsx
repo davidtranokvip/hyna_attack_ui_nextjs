@@ -23,10 +23,17 @@ const ModalEditTeam: React.FC<IModalPermissionProps> = ({ error, open, item, onC
 
     const [form] = Form.useForm<ITeamItem>();
     const [valueParent, setValueParent] = useState<string>();
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const onChangeParent = (newValue: string) => {
         setValueParent(newValue);
     };
+
+    useEffect(() => {
+        if (!open) {
+            setIsSubmitting(false);
+        }
+    }, [open]);
 
     useEffect(() => {
         if (open && item) {
@@ -50,9 +57,16 @@ const ModalEditTeam: React.FC<IModalPermissionProps> = ({ error, open, item, onC
         }
     }, [error, form]);
 
-    const handleSubmit = (formValues: ITeamItem) => {
+    const handleSubmit = async (formValues: ITeamItem) => {
+        setIsSubmitting(true);
+        try {
             const values = { ...formValues, id: item.id };
-            onSave(values);
+            await onSave(values);
+        } catch (error) {
+            console.error('Error updating user:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const clearFieldError = (fieldName: keyof ITeamItem) => {
@@ -81,6 +95,7 @@ const ModalEditTeam: React.FC<IModalPermissionProps> = ({ error, open, item, onC
                     <Form.Item name="parent_id" label="Parent" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
                         <TreeSelect
                             showSearch
+                            size='large'
                             value={valueParent}
                             dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                             placeholder="Enter Parent"
@@ -93,7 +108,7 @@ const ModalEditTeam: React.FC<IModalPermissionProps> = ({ error, open, item, onC
                 </Col>
                 <Col span={24}>
                     <Form.Item name="servers" label="Server" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
-                        <Select showSearch placeholder="Enter server" mode="multiple" allowClear>
+                        <Select showSearch size='large' placeholder="Enter server" mode="multiple" allowClear>
                                 {servers && servers.length > 0 ? (
                                     servers.map((item: IMethodDataType, index: number) => (
                                         <Select.Option key={index} value={item.id}>{item.name}</Select.Option>
@@ -105,7 +120,7 @@ const ModalEditTeam: React.FC<IModalPermissionProps> = ({ error, open, item, onC
                     </Form.Item>
                 </Col>   
             </Row>  
-            <Button size="large" htmlType="submit" className="bg-primary text-black w-full">SUBMIT</Button>
+            <Button size="large" htmlType="submit" className="bg-primary text-black w-full" iconPosition="end" loading={isSubmitting} disabled={isSubmitting}>SUBMIT</Button>
            </CustomFormStyled>
         </Modal>
     );

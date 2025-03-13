@@ -21,9 +21,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
   return (
     <html lang="en">
+      <head>
+      <link rel="icon" href="/images/favicon.png" sizes="any" />
+      </head>
       <body
         className={`${roboto.className} antialiased`}
       >

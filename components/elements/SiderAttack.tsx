@@ -34,11 +34,13 @@ const SidebarAttack = () => {
           <MenuItem 
             icon={<FaHome />}
             path='/'
+            title='Home'
           />  
           {filteredMenuItems.map((menu, index) => (
             <MenuItem
               key={index}
               icon={menu.icon}
+              title={menu.title}
               path={`/${menu.path}`}
             />
           ))}
@@ -57,19 +59,23 @@ const SidebarAttack = () => {
 interface MenuItemProps {
   icon: React.ReactNode;
   path: string;
+  title: string;
 }
 
-const MenuItem = ({ icon, path }: MenuItemProps) => {
+const MenuItem = ({ icon, path, title }: MenuItemProps) => {
   const pathname = usePathname();
   return (
     <a href={path}className={`
       w-12 h-12 text-xl rounded-full flex items-center justify-center 
-      hover:bg-[#31ff00] hover:text-black transition-all
+      hover:bg-[#31ff00] hover:text-black transition-all group
       ${pathname === path 
         ? 'bg-primary text-black' 
         : 'bg-[#ffffff1a] text-white'}
     `}>
-      {icon}
+      {icon}  
+      <span className="absolute left-[calc(100%+10px)] text-black text-sm px-3 font-semibold py-1 whitespace-nowrap opacity-0 bg-primary group-hover:opacity-100 transition-opacity pointer-events-none">
+        {title}
+      </span>
     </a>
   );
 };
