@@ -70,6 +70,24 @@ export interface IAttack {
   message: string
 }
 
+interface IListProcesses {
+  domain: string;
+  attack_time: string;
+  remaining_time: string;
+  concurrents: number;
+  pid: number;
+}
+
+export const stopProcesses = async (pid: number) => {
+  const result = await axiosInstance.post<DataListResponse<IListProcesses>>(`${apiUrl}/stop_process/${pid}`);
+  return result.data;
+};
+
+export const getListProcesses = async () => {
+  const result = await axiosInstance.get<DataListResponse<IListProcesses>>(`${apiUrl}/list_processes`);
+  return result.data;
+};
+
 export const getAttackList = async () => {
   const result = await axiosInstance.get<DataListResponse<IAttackLog>>(apiUrl);
   return result.data;
