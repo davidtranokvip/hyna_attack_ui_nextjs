@@ -1,7 +1,7 @@
 import { IPermissionItem, IPermissionReq } from "@/api/permissions";
 import { CustomFormStyled } from "@/app/assets/styles/FormAntCustom";
 import { Col, Form, Modal, Row, Input, Button } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface IModalPermissionProps {
     open: boolean;
@@ -13,6 +13,7 @@ interface IModalPermissionProps {
 
 const ModalEditPermission: React.FC<IModalPermissionProps> = ({ error, open, item, onClose, onSave }) => {
     const [form] = Form.useForm();
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
         if (open && item ) {
@@ -26,6 +27,12 @@ const ModalEditPermission: React.FC<IModalPermissionProps> = ({ error, open, ite
     }, [item, form, open]);
 
     useEffect(() => {
+        if (!open) {
+            setIsSubmitting(false);
+        }
+    }, [open]);
+
+    useEffect(() => {
         if (error) {
             Object.entries(error).forEach(([field, message]) => {
                 form.setFields([{
@@ -36,9 +43,17 @@ const ModalEditPermission: React.FC<IModalPermissionProps> = ({ error, open, ite
         }
     }, [error, form]);
 
-    const handleSubmit = (formValues: IPermissionItem) => {
-        const values = { ...formValues, id: item.id };
-        onSave(values);
+    const handleSubmit = async (formValues: IPermissionItem) => {
+        setIsSubmitting(true);
+        
+        try {
+            const values = { ...formValues, id: item.id };
+            await onSave(values);
+        } catch (error) {
+            console.error('Error updating permission:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const clearFieldError = (fieldName: keyof IPermissionReq) => {
@@ -74,7 +89,7 @@ const ModalEditPermission: React.FC<IModalPermissionProps> = ({ error, open, ite
                         </Form.Item>
                     </Col>   
                 </Row>
-                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full">SUBMIT</Button>
+                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full" iconPosition="end" loading={isSubmitting} disabled={isSubmitting}>SUBMIT</Button>
            </CustomFormStyled>
         </Modal>
     )

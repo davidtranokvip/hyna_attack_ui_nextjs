@@ -9,33 +9,45 @@ export interface IServerRes {
 }
 
 export interface IServerItem {
-    id: number;
-    ip: string;
-    name: string;
-    username: string;
-    password: string;
-    createdAt: Date;
-    updatedAt: Date;
+  id: number;
+  ip: string;
+  name: string;
+  username: string;
+  thread: number;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
-  
+
 export type IServerReq = Omit<IServerItem, 'id'>;
 
-export const createServer = async (body: IServerReq) => {
-  const result = await axiosInstance.post<IServerRes>(apiUrl, body);
-  return result.data;
-};
+export const serverApi = {
+  getAll: async () => {
+    const response = await axiosInstance.get<IServerRes>(apiUrl);
+    return response.data;
+  },
 
-export const getServerList = async () => {
-  const result = await axiosInstance.get<IServerRes>(apiUrl);
-  return result.data;
+  getServerForTeam: async (teamId: number) => {
+    const response = await axiosInstance.get(`${apiUrl}/team`, {
+      params: {
+        team_id: teamId
+      }
+    });
+    return response.data;
+  },
+  
+  create: async (body: IServerReq) => {
+    const response = await axiosInstance.post<IServerRes>(apiUrl, body);
+    return response.data;
+  },
+  
+  update: async (data: IServerItem) => {
+    const response = await axiosInstance.put(`${apiUrl}/${data.id}`, data);
+    return response.data;
+  },
+  
+  delete: async (id: number) => {
+    const response = await axiosInstance.delete<IServerRes>(`${apiUrl}/${id}`);
+    return response.data;
+  }
 };
-
-export const deleteServer = async (id: number) => {
-  const result = await axiosInstance.delete<IServerRes>(`${apiUrl}/${id}`);
-  return result.data;
-};
-
-export const updateServer = async (data: IServerItem) => {
-  const result = await axiosInstance.put(`${apiUrl}/${data?.id}`, data);
-  return result.data;
-}

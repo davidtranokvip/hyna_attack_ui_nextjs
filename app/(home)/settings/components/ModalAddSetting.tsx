@@ -18,6 +18,7 @@ const ModalAddSetting: React.FC<IModalSettingProps> = ({ open, onClose, onSave, 
     const tableRef = useRef<HTMLDivElement>(null);
     const [valueKey, setValueKey] = useState<IInputKeyValue[]>([]);
     const [lastAddedId, setLastAddedId] = useState<number | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
         if (lastAddedId && tableRef.current) {
@@ -33,10 +34,12 @@ const ModalAddSetting: React.FC<IModalSettingProps> = ({ open, onClose, onSave, 
         if (!open) {
             setValueKey([]);
             form.resetFields();
+            setIsSubmitting(false);
         }
     }, [open, form]);
 
-    const handleSubmit = (formValues: ISettingReq) => {
+    const handleSubmit = async (formValues: ISettingReq) => {
+        setIsSubmitting(true);
 
         if (valueKey.length === 0) {
             console.error('Error data');
@@ -57,7 +60,14 @@ const ModalAddSetting: React.FC<IModalSettingProps> = ({ open, onClose, onSave, 
             input: formValues.input || '',
             value: valueArray
         }));
-        onSave(settingRequests)
+
+        try {
+            await onSave(settingRequests);
+        } catch (error) {
+            console.error('Error submitting form:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const generateId = () => {
@@ -224,13 +234,13 @@ const ModalAddSetting: React.FC<IModalSettingProps> = ({ open, onClose, onSave, 
                             rowKey="id"
                             scroll={{ y: 24 * 8}}
                             locale={{ emptyText: null }}
-                            style={{ marginBottom: 32, tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
+                            style={{ marginBottom: 32, background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
                             />
                     </Col>   
                 </Row>
                 <div className="flex gap-3 items-center mb-3 justify-start">
                     <Button size="large" type="dashed" className="bg-primary text-black" onClick={handleAddRow}>+</Button>
-                    <Button size="large" htmlType="submit" className="bg-primary text-black con">SUBMIT</Button>
+                    <Button size="large" htmlType="submit" className="bg-primary text-black con" iconPosition="end" loading={isSubmitting} disabled={isSubmitting}>SUBMIT</Button>
                 </div>
            </CustomFormStyled>
         </Modal>

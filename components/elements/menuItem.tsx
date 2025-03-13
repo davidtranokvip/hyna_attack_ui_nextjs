@@ -1,5 +1,4 @@
-import { IoMdSettings } from "react-icons/io";
-// import { IoLogoBuffer, IoMdTime } from "react-icons/io";
+import { IoMdSettings, IoMdTime } from "react-icons/io";
 import { GiTeamIdea } from "react-icons/gi";
 import { FaUsers, FaUserTag } from "react-icons/fa";
 import { RiSwordFill } from "react-icons/ri";
@@ -8,48 +7,43 @@ import { HiServer } from "react-icons/hi";
 
 export const menuItems = [
   {
-    path: 'users',
-    title: 'Users',
-    icon: <FaUsers />
-  },
-  // {
-  //   path: 'attack_log',
-  //   title: 'ATTACK LOG',
-  //   icon: <IoLogoBuffer />
-  // },
-  // {
-  //   path: 'user_log',
-  //   title: 'USER LOG',
-  //   icon: <IoMdTime />
-  // },
-  {
-    path: 'permissions',
-    title: 'PERMISSIONS',
-    icon: <FaUserTag />
-  },
-  {
-    path: 'teams',
-    title: 'TEAMS',
-    icon: <GiTeamIdea />
-  },
-  {
     path: 'attack',
-    title: 'ATTACK SITE',
+    title: 'Attack Hub',
     icon: <RiSwordFill />
   },
   {
     path: 'attack_manager',
-    title: 'ATTACK MANAGER',
+    title: 'Attack Manager',
     icon: <MdHandyman />
   },
   {
+    path: 'users',
+    title: 'Users',
+    icon: <FaUsers />
+  },
+  {
+  path: 'teams',
+  title: 'Teams',
+  icon: <GiTeamIdea />
+  },
+  {
+    path: 'user_log',
+    title: 'User Log',
+    icon: <IoMdTime />
+  },
+  {
+    path: 'permissions',
+    title: 'Permission',
+    icon: <FaUserTag />
+  },
+  {
     path: 'settings',
-    title: 'SETTING MANAGER',
+    title: 'Setting',
     icon: <IoMdSettings />
   },
   {
     path: 'server',
-    title: 'SERVER MANAGER',
+    title: 'Server',
     icon: <HiServer />
   },
 ];

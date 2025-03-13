@@ -14,23 +14,26 @@ const Page = () => {
     const [openEdit, setOpenEdit] = useState<boolean>(false);
     const [error, setError] = useState("");
     const [editingItem, setEditingItem] = useState<IPermissionItem | undefined>();
+    const [loading, setLoading] = useState<boolean>(false);
 
     const showModalEdit = (record: IPermissionItem) => {
         setEditingItem(record);
         setOpenEdit(true);
     };
 
-    useEffect(() => {
-        const fetchingData = async () => {
-            try {
-                const result: IPermissionRes = await getPermissionList();
-                    if(result.status === 'success') {
-                        setTableData(result.data);
-                    }
-            } catch (error) {
-                console.error('Error fetching', error);
-            }
+    const fetchingData = async () => {
+        try {
+            setLoading(true);
+            const result: IPermissionRes = await getPermissionList();
+                if(result.status === 'success') {
+                    setLoading(false);
+                    setTableData(result.data);
+                }
+        } catch (error) {
+            console.error('Error fetching', error);
         }
+    }
+    useEffect(() => {
         fetchingData();
     }, []);
 
@@ -40,6 +43,8 @@ const Page = () => {
             if(result?.status === 'success') {
                 setOpenAdd(false);    
                 form.resetFields();
+
+                await fetchingData();
             }
         } catch (error: any) {
             Object.keys(error).forEach((field) => {
@@ -56,6 +61,8 @@ const Page = () => {
             const result = await updatePermission(request);
             if (result.status === 'success') {
                 setOpenEdit(false);
+
+                await fetchingData();
             }   
         } catch (error: any) {
             setError(error);
@@ -141,10 +148,11 @@ const Page = () => {
                                 columns={columns}
                                 dataSource={tableData}
                                 pagination={false}
+                                loading={loading}
                                 rowKey="id"
                                 scroll={{ y: 24 * 24}}
                                 locale={emptyData}
-                                style={{ tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
+                                style={{ background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
                                 />
                         </Card>
                     </div>

@@ -22,16 +22,20 @@ interface IMethodDataType {
 
 const ModalAddTeam: React.FC<IModalAddProps> = ({ open, onClose, onSave, form, treeData, servers }) => {
     const [valueParent, setValueParent] = useState<string>();
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     const onChangeParent = (newValue: string) => {
         setValueParent(newValue);
     };
 
     const handleSubmit = async (values: ITeamReq) => {
+        setIsSubmitting(true);
         try {
             await onSave(values);
         } catch (error) {
             console.error('Error data', error);
+        } finally {
+            setIsSubmitting(false);
         }
     }; 
 
@@ -64,6 +68,7 @@ const ModalAddTeam: React.FC<IModalAddProps> = ({ open, onClose, onSave, form, t
                                 dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                                 placeholder="Enter Parent"
                                 allowClear
+                                size='large'
                                 treeDefaultExpandAll
                                 onChange={onChangeParent}
                                 treeData={treeData}
@@ -72,7 +77,7 @@ const ModalAddTeam: React.FC<IModalAddProps> = ({ open, onClose, onSave, form, t
                     </Col>
                     <Col span={24}>
                         <Form.Item name="servers" label="Server" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
-                            <Select showSearch placeholder="Enter server" mode="multiple" allowClear>
+                            <Select showSearch size='large' placeholder="Enter server" mode="multiple" allowClear>
                                 {servers && servers.length > 0 ? (
                                     servers.map((item: IMethodDataType, index: number) => (
                                         <Select.Option key={index} value={item.id}>{item.name}</Select.Option>
@@ -84,7 +89,7 @@ const ModalAddTeam: React.FC<IModalAddProps> = ({ open, onClose, onSave, form, t
                         </Form.Item>
                     </Col>   
                 </Row>
-                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full">SUBMIT</Button>
+                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full" iconPosition="end" loading={isSubmitting} disabled={isSubmitting}>SUBMIT</Button>
            </CustomFormStyled>
         </Modal>
     );

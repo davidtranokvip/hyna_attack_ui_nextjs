@@ -1,6 +1,7 @@
 import { IPermissionReq } from "@/api/permissions";
 import { CustomFormStyled } from "@/app/assets/styles/FormAntCustom";
 import { Button, Col, Form, FormInstance, Input, Modal, Row } from "antd";
+import { useState } from "react";
 
 interface IModalPermissionProps {
     open: boolean;
@@ -11,11 +12,16 @@ interface IModalPermissionProps {
 
 const ModalAddPermission: React.FC<IModalPermissionProps> = ({ open, onClose, onSave, form }) => {
     
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
     const handleSubmit = async (values: IPermissionReq) => {
+        setIsSubmitting(true);
         try {
             await onSave(values);
         } catch (error) {
             console.error('Error fetching', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -52,7 +58,7 @@ const ModalAddPermission: React.FC<IModalPermissionProps> = ({ open, onClose, on
                         </Form.Item>
                     </Col>   
                 </Row>
-                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full">SUBMIT</Button>
+                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full" iconPosition="end" loading={isSubmitting} disabled={isSubmitting}>SUBMIT</Button>
            </CustomFormStyled>
         </Modal>
     )

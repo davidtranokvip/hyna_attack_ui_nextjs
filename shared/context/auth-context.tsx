@@ -7,7 +7,8 @@ const AuthContext = createContext<ReturnType<typeof useAuthHook>>({
   isLoading: true,
   user: {
     nameAccount: '',
-    isAdmin: false
+    isAdmin: false,
+    thread: 0
   },
 });
 

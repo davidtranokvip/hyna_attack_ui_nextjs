@@ -1,10 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence  } from "framer-motion";
-// import SceneWrapper from "@/components/SceneWrapper";
 import NoticeError from "@/components/notice/NoticeError";
 import Datalist from "@/components/dashboard/DataList";
+import Image from "next/image";
 
 const targetLocation = "Vietnam, Ho Chi Minh City";
 const baseUrlBlockHost = process.env.NEXT_PUBLIC_BASE_API_BLOCK_HOST;
@@ -18,6 +18,19 @@ export default function Home() {
   const [isSearched, setIsSearched] = useState(false);
   const [error, setError] = useState("");
   const [domain, setDomain] = useState("");
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 1280);
+    };
+
+    checkScreenSize();
+
+    window.addEventListener('resize', checkScreenSize);
+
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -88,32 +101,40 @@ export default function Home() {
       {error && (
         <NoticeError error={error} setError={setError} myClass="text-5xl mb-0 leading-[3.5rem]" />
       )}
-      <div className="overflow-hidden h-full inner-body">
+      <div className={`${isMobile ? '' : 'h-full'} overflow-y-auto inner-body p-8`}>
         <div className="content-body h-full">
-          <div className="mx-auto p-8 relative h-full">
-            <div className="grid gap-4 h-full grid-cols-3 grid-rows-2">
-              <motion.div 
-                layout
-                className={`flex flex-col row-span-2 ${
-                  isSearched ? 'col-start-1 col-end-2' : 'col-start-2 col-end-3'
-                }`}
-                transition={{ duration: 0.5, ease: ["easeOut", "easeIn"], }}
-              >
-                  {/* <SceneWrapper myClass="h-[450px] mb-3" /> */}
-                  <h3 className="title_login h-[450px] hero glitch layers flex items-center">
-                    <span>
-                      HYNA SYSTEM
-                    </span>
-                  </h3>
+          <div className="mx-auto relative h-full">
+            <div className={`grid gap-4 h-full ${isMobile 
+                ? 'grid-cols-1' 
+                : isSearched ? 'grid-cols-3 grid-rows-2' : 'grid-cols-3 grid-rows-2'
+              }`}>
+                <motion.div
+                  layout
+                  className={`flex flex-col items-center ${
+                    isMobile
+                      ? ''
+                      : isSearched 
+                        ? 'row-span-2 col-start-1 col-end-2' 
+                        : 'row-span-2 col-start-2 col-end-3'
+                  }`}
+                  transition={{ duration: 0.5, delay: 0.2, ease: ["easeOut", "easeIn"], }}
+                >
+                  <Image
+                    src="/images/logo.png"
+                    width={isMobile ? 350 : 450}
+                    height={isMobile ? 350 : 450}
+                    className={`${isMobile ? 'mb-4' : ''}`}
+                    alt="HYNY SYSTEM"
+                  />  
                   <AnimatePresence>
                     {isSearched && (
                       <motion.h2
                         key="animated-text"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.5, duration: 0.1, ease: ["easeIn", "easeOut"], }}
+                        transition={{ delay: 0.5, duration: 0.2, ease: ["easeIn", "easeOut"], }}
                         exit={{ opacity: 0 }}
-                        className="text-5xl mb-3 text-center text-primary font-bold leading-[normal] z-40"
+                        className={`${isMobile ? 'text-3xl' : 'text-5xl'} mb-3 text-center text-primary font-bold leading-[normal] z-40`}
                       >
                         {'HYNA EYE'.split('').map((letter, index) => (
                           <motion.span
@@ -133,7 +154,7 @@ export default function Home() {
                       <input 
                          type="text" 
                          autoComplete="off"
-                         className="block font-semibold w-full bg-card text-primary flex-1 leading-5 text-xl focus:outline-none focus:ring-0" 
+                         className={`block font-semibold w-full bg-card text-primary flex-1 leading-5 ${isMobile ? 'text-lg' : 'text-xl'} focus:outline-none focus:ring-0`}
                          placeholder="Hyna Eye is ready. Enter a domain to analyze..." 
                          value={target}
                          onChange={(e) => setTarget(e.target.value)} 
@@ -147,7 +168,7 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5, duration: 1.2, ease: 'easeOut' }}
                     >
-                       <div className="text-primary text-2xl font-light m-2 leading-[normal]">
+                      <div className={`text-primary ${isMobile ? 'text-lg' : 'text-2xl'} font-light m-2 leading-[normal]`}>
                          {description.split('').map((letter, index) => (
                            <motion.span
                              key={index}
@@ -163,8 +184,8 @@ export default function Home() {
                    }
                  </motion.div>
                <motion.div
-                 className="col-span-2 row-span-2" 
-                 initial={{ opacity: 0, y: 100 }}
+                className={`${isMobile ? '' : 'col-span-2 row-span-2'}`}
+                 initial={{ opacity: 0, y: 100 }} 
                  animate={{ 
                    opacity: isSearched ? 1 : 0,
                    y: isSearched ? 0 : 100,

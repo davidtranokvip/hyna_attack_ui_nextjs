@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import ModalAddTeam from "./components/ModalAddTeam";
 import ModalEditTeam from "./components/ModalEditTeam";
-import { getServerList, IServerItem, IServerRes } from "@/api/server";
+import { serverApi, IServerItem, IServerRes } from "@/api/server";
 
 const Page = () => {
 
@@ -18,30 +18,34 @@ const Page = () => {
     const [openEdit, setOpenEdit] = useState<boolean>(false);
     const [parent, setParent] = useState<ParentItem[]>([]);
     const [servers, setServers] = useState<IServerItem[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const showModalEdit = (record: ITeamItem) => {
         setEditingItem(record);
         setOpenEdit(true);
     };
     
-    useEffect(() => {
-            const fetchingData = async () => {
-            try {
-                const result: ITeamRes = await getTeamApi();
-                    if(result.status === 'success') {
-                        setTableData(result.data);
-                    }
-            } catch (error) {
-                console.error('Error data', error);
-            }
+    const fetchingData = async () => {
+        try {
+            setLoading(true);
+            const result: ITeamRes = await getTeamApi();
+                if(result.status === 'success') {
+                    setLoading(false);
+                    setTableData(result.data);
+                }
+        } catch (error) {
+            console.error('Error data', error);
         }
+    }
+   
+    useEffect(() => {
         fetchingData();
     }, [form]);
 
     useEffect(() => {
         const fetchingData = async () => {
         try {
-            const result: IServerRes = await getServerList();
+            const result: IServerRes = await serverApi.getAll();
                 if(result.status === 'success') {
                     setServers(result.data);
                 }
@@ -81,6 +85,9 @@ const Page = () => {
         if(result?.status === 'success') {
             setOpenAdd(false);    
             form.resetFields();
+
+            await fetchingData();
+
         }
         } catch (error: any) {
             Object.keys(error).forEach((field) => {
@@ -97,6 +104,8 @@ const Page = () => {
             const result = await updateTeamApi(request);
             if (result.status === 'success') {
                 setOpenEdit(false);
+
+                await fetchingData();
             }   
         } catch (error: any) {
             setError(error);
@@ -220,10 +229,11 @@ const Page = () => {
                                 columns={columns}
                                 dataSource={tableData}
                                 pagination={false}
+                                loading={loading}
                                 rowKey="id"
                                 scroll={{ y: 24 * 24}}
                                 locale={emptyData}
-                                style={{ tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
+                                style={{ background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
                             />
                         </Card>
                     </div>

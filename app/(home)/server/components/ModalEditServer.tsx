@@ -1,7 +1,7 @@
 import { IServerItem, IServerReq } from "@/api/server";
 import { CustomFormStyled } from "@/app/assets/styles/FormAntCustom";
 import { Button, Col, Form, Input, Modal, Row } from "antd";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 
 interface IModalServerProps {
@@ -13,7 +13,14 @@ interface IModalServerProps {
 }
 const ModalEditServer: React.FC<IModalServerProps> = ({ error, open, item, onClose, onSave }) => {
     const [form] = Form.useForm();
-    
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+
+    useEffect(() => {
+        if (!open) {
+            setIsSubmitting(false);
+        }
+    }, [open]);
     useEffect(() => {
             if (open && item ) {
                 form.setFieldsValue({   
@@ -22,6 +29,7 @@ const ModalEditServer: React.FC<IModalServerProps> = ({ error, open, item, onClo
                     ip: item.ip,
                     username: item.username,
                     password: item.password,
+                    thread: item.thread,
                 });
             }
     }, [item, form, open]);
@@ -38,9 +46,17 @@ const ModalEditServer: React.FC<IModalServerProps> = ({ error, open, item, onClo
         }
     }, [error, form]);
 
-    const handleSubmit = (formValues: IServerItem) => {
-        const values = { ...formValues, id: item.id };
-        onSave(values);
+    const handleSubmit = async (formValues: IServerItem) => {
+        setIsSubmitting(true);
+        try {
+                const values = { ...formValues, id: item.id };
+                await onSave(values);
+            
+        } catch (error) {
+                console.error('Error updating user:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const clearFieldError = (fieldName: keyof IServerReq) => {
@@ -66,22 +82,27 @@ const ModalEditServer: React.FC<IModalServerProps> = ({ error, open, item, onClo
                             </Form.Item>
                     </Col>   
                     <Col span={12}>
+                        <Form.Item name="thread" label="Thread" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
+                            <Input size='large' onChange={() => clearFieldError('thread')} className="mt-2" autoComplete="off" placeholder="Enter thread" />
+                        </Form.Item>
+                    </Col>   
+                    <Col span={8}>
                         <Form.Item name="ip" label="IP" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
                             <Input size='large' onChange={() => clearFieldError('ip')} className="mt-2" autoComplete="off" placeholder="Enter ip" />
                         </Form.Item>
                     </Col>   
-                    <Col span={12}>
+                    <Col span={8}>
                         <Form.Item name="username" label="Username" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
                             <Input size='large' onChange={() => clearFieldError('username')} className="mt-2" autoComplete="off" placeholder="Enter username" />
                         </Form.Item>
                     </Col>   
-                    <Col span={12}>
+                    <Col span={8}>
                         <Form.Item name="password" label="Password" className="font-bold text-primary text-[30px] leading-[normal] mb-0">
                             <Input size='large' onChange={() => clearFieldError('password')} className="mt-2" autoComplete="off" placeholder="Enter password" />
                         </Form.Item>
                     </Col>   
                 </Row>
-                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full">SUBMIT</Button>
+                <Button size="large" htmlType="submit" className="bg-primary text-black mt-3 w-full" iconPosition="end" loading={isSubmitting} disabled={isSubmitting}>SUBMIT</Button>
            </CustomFormStyled>
         </Modal>
     )

@@ -9,6 +9,7 @@ import { IoEyeOff, IoEyeOffOutline } from "react-icons/io5";
 import ModalAddUser from "./components/ModalAddUser";
 import { getPermissionList, IPermissionItem, IPermissionRes } from "@/api/permissions";
 import ModalEditUser from "./components/ModalEditUser";
+import { serverApi } from "@/api/server";
 
 interface PasswordVisibility {
     [key: number]: boolean;
@@ -30,6 +31,11 @@ const Page = () => {
     const [visiblePasswords, setVisiblePasswords] = useState<PasswordVisibility>({});
     
     const [teamData, setTeamData] = useState<ITeamItem[]>([]);
+
+    const [serverData, setServerData] = useState<any[]>([]);
+    const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+    const [loading, setLoading] = useState<boolean>(false);
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -46,73 +52,122 @@ const Page = () => {
     }, [])
 
     useEffect(() => {
-      const fetchData = async () => {
-          try {
-              const response: IUserRes = await getListUserApi(); 
-              if(response.status === 'success') {
-                setTableData(response.data);
+      const fetchServerData = async () => {
+          if (selectedTeamId) {
+              try {
+                  const response = await serverApi.getServerForTeam(selectedTeamId);
+                  if (response.status === 'success') {
+                      setServerData(response.data);
+                  }
+              } catch (error) {
+                  console.error('Error fetching servers', error);
+                  setServerData([]);
               }
-          } catch (error) {
-              console.error('Error data', error);
+          } else {
+              setServerData([]);
           }
       };
       
-      fetchData();
-    }, [])
+      fetchServerData();
+  }, [selectedTeamId]);
 
-    useEffect(() => {
-      const fetchData = async () => {
-          try {
-              const response: IPermissionRes = await getPermissionList(); 
-              if(response.status === 'success') {
-                setPermissions(response.data);
-              }
-          } catch (error) {
-            console.error('Error data', error);
-          }
-      };
-      
-      fetchData();
-    }, [])
-
-     const showModalEdit = (record: IUserItem) => {
-        setEditingItem(record);
-        setOpenEdit(true);
-    };
-      
-    const togglePasswordVisibility = (id: number) => {
-      setVisiblePasswords(prev => ({
-        ...prev,
-        [id]: !prev[id]
-      }));
-    };
-
-    const handlAddData = async (request: IUserReq) => {
+  const fetchingData = async () => {
       try {
-        const result = await createUserApi(request);
-        if(result?.status === 'success') {
-            setOpenAdd(false);    
-            form.resetFields();
-        }
-      } catch (error: any) {
-        Object.keys(error).forEach((field) => {
-            form.setFields([{
-            name: field as keyof IUserReq,
-            errors: [error[field]]
-            }]);
-        });
+          setLoading(true);
+          const response: IUserRes = await getListUserApi(); 
+          if(response.status === 'success') {
+            setLoading(false);
+            setTableData(response.data);
+          }
+      } catch (error) {
+          console.error('Error data', error);
       }
+  };
+  
+  useEffect(() => {
+    fetchingData();
+  }, [])
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const response: IPermissionRes = await getPermissionList(); 
+            if(response.status === 'success') {
+              setPermissions(response.data);
+            }
+        } catch (error) {
+          console.error('Error data', error);
+        }
+    };
+    
+    fetchData();
+  }, [])
+
+  const showModalEdit = (record: IUserItem) => {
+    setEditingItem(record);
+    setSelectedTeamId(record.team_id);
+    setOpenEdit(true);
+  };
+    
+  const togglePasswordVisibility = (id: number) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleAddModalOpen = () => {
+    setSelectedTeamId(null);
+    setOpenAdd(true);
+  };
+
+  const handleModalClose = () => {
+    setOpenAdd(false);
+    setSelectedTeamId(null);
+    form.resetFields();
+  };
+
+  const handleEditModalClose = () => {
+    setOpenEdit(false);
+    setSelectedTeamId(null);
+  };
+
+  const handlAddData = async (request: IUserReq) => {
+    try {
+      const result = await createUserApi(request);
+      if(result?.status === 'success') {  
+          setOpenAdd(false);    
+          form.resetFields();
+          setSelectedTeamId(null);
+
+          await fetchingData();
+      }
+    } catch (error: any) {
+      Object.keys(error).forEach((field) => {
+          form.setFields([{
+          name: field as keyof IUserReq,
+          errors: [error[field]]
+          }]);
+      });
     }
+  }
 
     const handleUpdate = async (request: IUserItem) => {
       try {
         const result = await updateUserApi(request);
         if (result.status === 'success') {
             setOpenEdit(false);
+            setSelectedTeamId(null);
+            
+            await fetchingData();
         }   
       } catch (error: any) {
           setError(error);
       }
+    };
+    
+    const handleTeamChange = (teamId: number) => {
+      setSelectedTeamId(teamId);
     };
 
     const handleDelete = async (id: number) => {
@@ -128,18 +183,9 @@ const Page = () => {
 
     const columns = [
       {
-        title: 'Avtar',
-        dataIndex: 'avatar',
-        key: 'avatar',
-        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-        render: () => (
-          <Avatar style={{ backgroundColor: '#87d068' }} size='large' />
-        )
-      },
-      {
-        title: 'Email',
-        dataIndex: 'email',
-        key: 'email',
+        title: 'Account',
+        key: 'nameAccount',
+        dataIndex: 'nameAccount',
         className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
       },
       {
@@ -161,12 +207,6 @@ const Page = () => {
             </div>
           </Space>
         )
-      },
-      {
-        title: 'Account',
-        key: 'nameAccount',
-        dataIndex: 'nameAccount',
-        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
       },
       {
         title: 'Team',
@@ -195,6 +235,30 @@ const Page = () => {
         },
       },
       {
+        title: 'Server',
+        key: 'server_name',
+        dataIndex: 'server_name',
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
+        title: 'Thread',
+        key: 'thread',
+        dataIndex: 'thread',
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
+        title: 'entryTime',
+        key: 'entryTime',
+        dataIndex: 'entryTime',
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
+        title: 'exitTime',
+        key: 'exitTime',
+        dataIndex: 'exitTime',
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
         title: 'Actions',
           key: 'actions',
           className: "bg-card py-2 text-primary text-[1.125rem] leading-[normal] text-center",
@@ -219,7 +283,7 @@ const Page = () => {
         <Button size="large" 
           type="primary" 
           icon={<FaPlus />}
-          onClick={() => {setOpenAdd(true)}}
+          onClick={handleAddModalOpen}
         >
           ADD
         </Button>
@@ -235,24 +299,25 @@ const Page = () => {
           <div className="overflow-hidden h-full inner-body">
             <div className="content-body h-full">
               <div className="mx-auto p-8 relative">
-                <Card title='TEAM' extra={ButtonAdd()}>
+                <Card title='USERS' extra={ButtonAdd()}>
                   <Table
                     columns={columns}
                     dataSource={tableData}
                     pagination={false}
+                    loading={loading}
                     rowKey="id"
                     scroll={{ y: 24 * 24}}
                     locale={emptyData}
-                    style={{ tableLayout: 'fixed', background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
+                    style={{ background: '#2c2c2c', border: "1px solid #444444", borderRadius: '0.375rem' }}
                   />
                 </Card>
               </div>
             </div>
           </div>
           {editingItem && (
-              <ModalEditUser error={error} permissions={permissions} onSave={handleUpdate} teamData={teamData} open={openEdit} item={editingItem} onClose={() =>setOpenEdit(false)}/>
+              <ModalEditUser error={error} permissions={permissions} onSave={handleUpdate} teamData={teamData} open={openEdit} item={editingItem} onClose={handleEditModalClose} serverData={serverData} selectedTeamId={selectedTeamId} onTeamChange={handleTeamChange}  />
           )}
-          <ModalAddUser teamData={teamData} permissions={permissions} form={form} onSave={handlAddData} open={openAdd} onClose={() =>{setOpenAdd(false); form.resetFields()}} />
+          <ModalAddUser teamData={teamData} permissions={permissions} form={form} onSave={handlAddData} open={openAdd} onClose={handleModalClose} serverData={serverData} selectedTeamId={selectedTeamId} onTeamChange={handleTeamChange}/>
         </>
     );
 }
