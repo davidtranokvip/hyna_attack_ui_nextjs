@@ -286,7 +286,7 @@ const FBOParticles: React.FC = () => {
       {/* Simulation mesh - rendered to FBO */}
       {createPortal(
         <mesh ref={meshRef} geometry={simGeometry}>
-          <simulationMaterial ref={simulationMaterialRef} args={[size]} />
+          {/* <simulationMaterial ref={simulationMaterialRef} args={[size]} /> */}
         </mesh>,
         scene
       )}

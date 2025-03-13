@@ -2,7 +2,7 @@
 
 import { getTeamApi, ITeamItem, ITeamRes } from "@/api/team";
 import { createUserApi, deleteUserApi, getListUserApi, IUserItem, IUserReq, IUserRes, updateUserApi } from "@/api/users";
-import { Avatar, Button, Card, Empty, Form, Popconfirm, Space, Table } from "antd";
+import { Button, Card, Empty, Form, Popconfirm, Space, Table } from "antd";
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { IoEyeOff, IoEyeOffOutline } from "react-icons/io5";

@@ -40,9 +40,9 @@
 
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+// import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import FBOParticles from './FBOParticles';
 

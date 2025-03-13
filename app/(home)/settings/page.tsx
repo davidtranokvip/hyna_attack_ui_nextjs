@@ -2,7 +2,7 @@
 
 import { createSetting, deleteSettingApi, getSettingApi, ISettingRes, ISettingItem, ISettingReq, updateSettingApi } from "@/api/settings";
 import { Button, Card, Empty, Form, Popconfirm, Space, Table } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FaPlus } from "react-icons/fa";
 import ModalAddSetting from "./components/ModalAddSetting";
 import { convertToUppercaseWords } from "@/helpers/convertText";
@@ -49,55 +49,57 @@ const Page = () => {
         }));
     }
 
-    const fetchingData = async () => {
+    const fetchingData = useCallback(async () => {
         try {
             setLoading(true);
             const result: ISettingRes = await getSettingApi();
-            if(result.status === 'success') {
+            if (result.status === 'success') {
                 const restructuredData = restructureData(result.data ?? []);
-                setLoading(false);
                 setTableData(restructuredData);
             }
+            setLoading(false);
         } catch (error) {
             console.error('Error fetching', error);
         }
-    };
+    }, []); // Empty array ensures `fetchingData` remains stable
     
     useEffect(() => {
         fetchingData();
-    }, [form]);
+    }, [form, fetchingData]); // Now safe to include in dependencies
+    
     
     const handlAddData = async (request: ISettingReq[]) => {
         try {
             const result = await createSetting(request);
-            if(result?.status === 'success') {
-                setOpenAdd(false);    
+            if (result?.status === 'success') {
+                setOpenAdd(false);
                 form.resetFields();
-
-                await fetchingData();
+    
+                await fetchingData(); // Now it works
             }
         } catch (error: any) {
             Object.keys(error).forEach((field) => {
                 form.setFields([{
-                name: field as keyof ISettingReq,
-                errors: [error[field]]
+                    name: field as keyof ISettingReq,
+                    errors: [error[field]]
                 }]);
             });
         }
-    }
-
+    };
+    
     const handleUpdate = async (request: ISettingItem) => {
         try {
             const result = await updateSettingApi(request);
             if (result.status === 'success') {
                 setOpenEdit(false);
-
-                await fetchingData();
-            }   
+    
+                await fetchingData(); // Now it works
+            }
         } catch (error: any) {
             setError(error);
         }
     };
+    
 
     const handleDelete = async (id: number) => {
         try {
