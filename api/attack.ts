@@ -88,40 +88,10 @@ export const getListProcesses = async () => {
   return result.data;
 };
 
-export const getAttackList = async () => {
-  const result = await axiosInstance.get<DataListResponse<IAttackLog>>(apiUrl);
-  return result.data;
-};
-
-export const getAttackById = async (id: number) => {
-  const result = await axiosInstance.get<IAttackLog>(`${apiUrl}/${id}`);
-  return result.data;
-};
-
 export const createAttack = async (body: any) => {
   const encryptedData = encryptData(body);
   const result = await axiosInstance.post<IAttack>(apiUrl, {encryptedData: encryptedData.encryptedData,
     encryptedKey: encryptedData.encryptedKey,
     iv: encryptedData.iv,  });
-  return result.data;
-};
-
-export const deleteAttack = async (id: number) => {
-  const result = await axiosInstance.delete<IAttackLog>(`${apiUrl}/${id}`);
-  return result.data;
-};
-
-export const initiateAttack = async (payload: IAttackPayload) => {
-  const result = await axiosInstance.post<IAttackLog>(apiUrl, payload);
-  return result.data;
-};
-
-export const terminateServerAttack = async (
-  attackLogId: number,
-  hostname: string
-) => {
-  const result = await axiosInstance.post(
-    `${apiUrl}/terminate/${attackLogId}/server/${hostname}`
-  );
   return result.data;
 };

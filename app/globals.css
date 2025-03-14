@@ -151,16 +151,22 @@ code {
 .ant-slider-handle {
   border-color: rgb(0, 255, 0) !important;
 }
-
+.ant-checkbox-inner {
+  background: white !important;
+}
 .ant-slider-handle:hover::after, 
 .ant-slider-handle::after {
   box-shadow: 0 0 0 2.5px #ff1616 !important;
 }
-
+.ant-checkbox-inner:after {
+  border-color: #00ff00 !important;
+}
 .ant-tooltip {
   z-index: 0 !important;
 }
-
+td.ant-table-selection-column, .ant-table-cell {
+  background: #2c2c2c !important;
+}
 .ant-table-placeholder,
 tr.ant-table-placeholder:hover>td {
   background: #2c2c2c !important;
