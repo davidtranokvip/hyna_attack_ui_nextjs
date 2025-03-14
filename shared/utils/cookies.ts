@@ -2,7 +2,7 @@ import Cookies from 'js-cookie';
 
 export const setTokenCookie = (token: string) => {
   Cookies.set('hyna_token', token, { 
-    expires: 100 / (24 * 60),
+    expires: 10 / (24 * 60),
     path: '/',
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict'

@@ -61,11 +61,11 @@ const Page = () => {
         } catch (error) {
             console.error('Error fetching', error);
         }
-    }, []); // Empty array ensures `fetchingData` remains stable
+    }, []);
     
     useEffect(() => {
         fetchingData();
-    }, [form, fetchingData]); // Now safe to include in dependencies
+    }, [form, fetchingData]);
     
     
     const handlAddData = async (request: ISettingReq[]) => {
@@ -75,7 +75,7 @@ const Page = () => {
                 setOpenAdd(false);
                 form.resetFields();
     
-                await fetchingData(); // Now it works
+                await fetchingData(); 
             }
         } catch (error: any) {
             Object.keys(error).forEach((field) => {
@@ -93,13 +93,12 @@ const Page = () => {
             if (result.status === 'success') {
                 setOpenEdit(false);
     
-                await fetchingData(); // Now it works
+                await fetchingData();
             }
         } catch (error: any) {
             setError(error);
         }
     };
-    
 
     const handleDelete = async (id: number) => {
         try {
