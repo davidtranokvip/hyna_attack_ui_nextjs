@@ -52,14 +52,20 @@ export default function Home() {
     }
 
     try {
-      const blockSite = await axios.get(`${baseUrlBlockInternet}/site`, {
-        params: {
-          domain: target
-        }
-      });
-      const response = await axios.post(`${baseUrlBlockHost}/check`, {target});
-      setBlockingInterNet(blockSite?.data);
-      setResult(response?.data?.data);
+      const [blockSiteResponse, checkResponse] = await Promise.all([
+        axios.get(`${baseUrlBlockInternet}/site`, {
+          params: { domain: target }
+        }),
+        axios.post(`${baseUrlBlockHost}/check`, { target: cleanedUrl })
+      ]);
+  
+      if (blockSiteResponse?.data) {
+        setBlockingInterNet(blockSiteResponse.data);
+      }
+      
+      if (checkResponse?.data?.data) {
+        setResult(checkResponse.data.data);
+      }
     } catch (error: any) {
       console.error('error', error)
       setError("ERROR DURING SEARCH");
