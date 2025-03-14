@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Select, Slider, Input, Form, Switch, Modal } from "antd";
+import { Select, Slider, Input, Form, Switch } from "antd";
 import { motion, AnimatePresence } from 'framer-motion';
 import { createAttack } from '@/api/attack';
 import { attackTypeSystem } from '../settings/components/data';
@@ -14,7 +14,7 @@ import LoadingPage from '@/components/elements/LoadingPage';
 import { useRouter } from "next/navigation";
 import NoticeError from '@/components/notice/NoticeError';
 import SceneWrapper from '@/components/SceneWrapper';
-import { FiCheckCircle, FiAlertTriangle, FiLoader } from "react-icons/fi";
+import { FiLoader } from "react-icons/fi";
 import NoticePass from '@/components/notice/NoticePass';
 const { Option } = Select;
 
