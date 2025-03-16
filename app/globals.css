@@ -236,7 +236,7 @@ table {
   border-radius: 5px !important;       
 }
 
-.ant-select-item-option {
+.ant-select-item-option, .ant-form-item-required{
   color: rgb(0, 255, 0) !important; 
 }
 
@@ -358,4 +358,7 @@ table {
 }
 .ant-table-body table {
     table-layout: auto !important;
+}
+.ant-form-item-explain-error {
+  text-align: start;
 }
