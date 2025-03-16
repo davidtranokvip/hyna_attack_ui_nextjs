@@ -81,14 +81,14 @@ const Page = () => {
 
     const handlAddData = async (request: ITeamReq) => {
         try {
-        const result = await addTeamApi(request);
-        if(result?.status === 'success') {
-            setOpenAdd(false);    
-            form.resetFields();
+            const result = await addTeamApi(request);
+            if(result?.status === 'success') {
+                setOpenAdd(false);    
+                form.resetFields();
 
-            await fetchingData();
+                await fetchingData();
 
-        }
+            }
         } catch (error: any) {
             Object.keys(error).forEach((field) => {
                 form.setFields([{

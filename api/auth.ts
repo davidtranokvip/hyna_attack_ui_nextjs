@@ -1,11 +1,17 @@
 import { encryptData } from "@/helpers/payloadData";
-import { axiosInstancePublic } from "@/shared/utils/ApiUtils";
+import { axiosInstance, axiosInstancePublic } from "@/shared/utils/ApiUtils";
 
 const apiUrl = "auth";
 
 export interface ILoginReq {
   nameAccount?: string;
   password?: string;
+}
+
+export interface IUpdateReq {
+  currentPassword: string;
+  newPassword?: string;
+  repeatPassword?: string;
 }
 
 interface ILoginRes {
@@ -25,3 +31,14 @@ export const loginApi = async (req: ILoginReq) => {
   });
   return result.data;
 };
+
+export const updatePassword = async (req: IUpdateReq) => {
+  const encryptedData = encryptData(req);
+  const result = await axiosInstance.post<ILoginRes>(`${apiUrl}/change_password`, {
+    encryptedData: encryptedData.encryptedData,
+    encryptedKey: encryptedData.encryptedKey,
+    iv: encryptedData.iv,  
+  });
+  return result.data;
+};
+

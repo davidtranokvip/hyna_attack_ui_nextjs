@@ -28,7 +28,7 @@ const Page = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
   const rowSelection: TableProps<TableData>['rowSelection'] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: TableData[]) => {
+    onChange: (selectedRowKeys: React.Key[]) => {
       setSelectedRowKeys(selectedRowKeys);
     },
     selectedRowKeys,
