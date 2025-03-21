@@ -2,7 +2,6 @@ import axios from "axios";
 import { getTokenFromCookie, removeTokenCookie } from "./cookies";
 
 const baseURL = process.env.NEXT_PUBLIC_BASE_URL;
-
 export const axiosInstancePublic = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
@@ -29,7 +28,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
-  },
+  }, 
   (error) => {
     if (error.response && error.response.status === 401) {
       removeTokenCookie()

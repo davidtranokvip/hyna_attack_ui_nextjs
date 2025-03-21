@@ -76,10 +76,13 @@ interface IListProcesses {
   remaining_time: string;
   concurrents: number;
   pid: number;
+  server_id: number;
+  server_name: string;
 }
 
-export const stopProcesses = async (pid: number) => {
-  const result = await axiosInstance.post<DataListResponse<IListProcesses>>(`${apiUrl}/stop_process/${pid}`);
+export const stopProcesses = async (pid: number, server_id?: number) => {
+  const body = server_id !== undefined ? { server_id } : {};
+  const result = await axiosInstance.post(`${apiUrl}/stop_process/${pid}`, body);
   return result.data;
 };
 
@@ -93,5 +96,16 @@ export const createAttack = async (body: any) => {
   const result = await axiosInstance.post<IAttack>(apiUrl, {encryptedData: encryptedData.encryptedData,
     encryptedKey: encryptedData.encryptedKey,
     iv: encryptedData.iv,  });
+  return result.data;
+};
+
+export const stopMultipleProcesses = async (pids: number[], server_id?: number[]) => {
+  const payload: any = { pids };
+  
+  if (server_id && server_id.length > 0) {
+    payload.server_id = server_id;
+  }
+  
+  const result = await axiosInstance.post(`${apiUrl}/stop_multiple_processes`, payload);
   return result.data;
 };

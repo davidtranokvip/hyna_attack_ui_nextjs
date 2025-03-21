@@ -17,6 +17,7 @@ export interface IUpdateReq {
 interface ILoginRes {
   data: {
     token: string;
+    expires_at: Date;
   };
   message: string;
   status: string;

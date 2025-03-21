@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button, Card, Empty, Table, Statistic, Row, Col, Popconfirm, TableProps } from "antd";
 import ParticlesAnimation from "@/components/elements/ParticlesAnimation";
 import {
@@ -10,23 +10,25 @@ import {
   FaCrosshairs,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { getListProcesses, stopProcesses } from "@/api/attack";
+import { getListProcesses, stopMultipleProcesses, stopProcesses } from "@/api/attack";
+import { useAuth } from "@/shared/lib/auth";
 
 interface TableData {
   id?: string;
   domain: string;
   attack_time: string;
-  server?: string;
+  server_id: number;
+  server_name: string;
   remaining_time: string;
   concurrents: number;
   pid: number;
 }
-
+  
 const Page = () => {
+  const { user } = useAuth();
   const [tableData, setTableData] = useState<TableData[]>([]);
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
   const rowSelection: TableProps<TableData>['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[]) => {
       setSelectedRowKeys(selectedRowKeys);
@@ -34,28 +36,30 @@ const Page = () => {
     selectedRowKeys,
   };
   
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsConnecting(true);
-        const result = await getListProcesses();
-        console.log(result);
-        if (result.status === 'success') {
-          const newTableData: TableData[] = result.data.map((item) => ({
-            domain: item.domain,
-            attack_time: item.attack_time,
-            remaining_time: item.remaining_time,
-            concurrents: item.concurrents,
-            pid: item.pid,
-          }));
-          setIsConnecting(false);
-          setTableData(newTableData);
-        }
-      } catch (error) {
-        console.error("Error fetching process list:", error);
+  const fetchData = async () => {
+    try {
+      setIsConnecting(true);
+      const result = await getListProcesses();
+      console.log(result);
+      if (result.status === 'success') {
+        const newTableData: TableData[] = result.data.map((item) => ({
+          domain: item.domain,
+          attack_time: item.attack_time,
+          remaining_time: item.remaining_time,
+          concurrents: item.concurrents,
+          server_id: item.server_id,
+          server_name: item.server_name,
+          pid: item.pid,
+        }));
+        setIsConnecting(false);
+        setTableData(newTableData);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching process list:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -63,28 +67,19 @@ const Page = () => {
     if (tableData.length === 0) {
       return;
     }
-    
-    setIsConnecting(true);
-    
+    setIsConnecting(true);  
     try {
-      const allPids = tableData.map(item => item.pid).filter(pid => pid !== undefined) as number[];
-      
-      let lastResult;
-      for (const pid of allPids) {
-        lastResult = await stopProcesses(pid);
-      }
-      
-      if (lastResult && lastResult.status === 'success') {
-        const newTableData: TableData[] = lastResult.data.map((item) => ({
-          domain: item.domain,
-          attack_time: item.attack_time,
-          remaining_time: item.remaining_time,
-          concurrents: item.concurrents,
-          pid: item.pid,
-        }));
-        setSelectedRowKeys([]);
+      const pidNumbers = selectedRowKeys.map(key => Number(key));
+      const selectedItems = tableData.filter(item => selectedRowKeys.includes(item.pid));
+      const serverIds = selectedItems.map(item => item.server_id);
+      const result = await stopMultipleProcesses(
+        pidNumbers, 
+        user?.isAdmin ? serverIds : undefined
+      );
+      if (result.status === 'success') {
         setIsConnecting(false);
-        setTableData(newTableData);
+        setSelectedRowKeys([]);
+        fetchData();
       }
     } catch (error) {
       setIsConnecting(false);
@@ -92,70 +87,70 @@ const Page = () => {
     }
   };
   
-  const handleCancelAttack = async (pid: number) => {
+  const handleCancelAttack = async (pid: number, server_id: number) => {
     setIsConnecting(true);
 
-    if (!pid) {
-      console.error("No pid available");
-      return;
-    }
-
     try {
-      const result= await stopProcesses(pid);
+      const result = await stopProcesses(pid, user?.isAdmin ? server_id : undefined);
       if (result.status === 'success') {
-        const newTableData: TableData[] = result.data.map((item) => ({
-          domain: item.domain,
-          attack_time: item.attack_time,
-          remaining_time: item.remaining_time,
-          concurrents: item.concurrents,
-          pid: item.pid,
-        }));
         setIsConnecting(false);
-        setTableData(newTableData);
+        fetchData()
       }
     } catch (error) {
       setIsConnecting(false);
       console.error("Error fetching process list:", error);
     }
   };
+  const columns = useMemo(() => {
+    const baseColumns = [
+      {
+        title: "Domain",
+        dataIndex: "domain",
+        key: "domain",
+        width: '20%',
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
+        title: "Attack Time",
+        dataIndex: "attack_time",
+        key: "attack_time",
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
+        title: "Concurrents",
+        dataIndex: "concurrents",
+        key: "concurrents",
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      },
+      {
+        title: 'Option',
+        key: 'option',
+        className: "bg-card py-2 text-primary text-[1.125rem] leading-[normal] text-center",
+        render: (_: any, record: TableData) => (
+          <Popconfirm
+            title="Cancel Attack"
+            description="Do you want to stop the attack?"
+            okText="Yes"
+            onConfirm={() => record.pid && handleCancelAttack(record.pid, record.server_id)}
+            cancelText="No"
+          >
+            <Button size="large" className="bg-primary float-end text-black">Cancel</Button>
+          </Popconfirm>
+        ),
+      },
+    ];
 
-  const columns = [
-    {
-      title: "Domain",
-      dataIndex: "domain",
-      key: "domain",
-      width: '31%',
-      className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-    },
-    {
-      title: "Attack Time",
-      dataIndex: "attack_time",
-      key: "attack_time",
-      className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-    },
-    {
-      title: "Concurrents",
-      dataIndex: "concurrents",
-      key: "concurrents",
-      className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
-    },
-    {
-      title: 'Option',
-      key: '',
-      className: "bg-card py-2 text-primary text-[1.125rem] leading-[normal] text-center",
-      render: (_: any, record: TableData) => (
-        <Popconfirm
-          title="Cancel Attack"
-          description="Do you want to stop the attack?"
-          okText="Yes"
-          onConfirm={() => record.pid && handleCancelAttack(record.pid)}
-          cancelText="No"
-      >
-          <Button size="large" className="bg-primary float-end text-black">Cancel</Button>
-      </Popconfirm>
-      ),
-    },
-  ];
+    if (user?.isAdmin) {
+      baseColumns.splice(3, 0, {
+        title: "Server",
+        dataIndex: "server_name",
+        key: "server_name",
+        className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
+      });
+    }
+
+    return baseColumns;
+  }, [user]);
 
   const emptyData = {
     emptyText: (
@@ -237,7 +232,7 @@ const Page = () => {
                     type="primary"
                     disabled={tableData.length === 0}
                   >
-                    Cancel All
+                    Cancel Selected ({selectedRowKeys.length})
                   </Button>
                 </Popconfirm>
               }>
@@ -249,7 +244,7 @@ const Page = () => {
                   pagination={false}
                   rowKey="pid"
                   locale={emptyData}
-                  scroll={{ y: 24 * 24 }}
+                  scroll={{ y: 24 * 16 }}
                   loading={isConnecting}
                   style={{
                     background: "#2c2c2c",

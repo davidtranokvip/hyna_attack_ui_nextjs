@@ -88,7 +88,6 @@ export default function AppLayout({
   if (isLoading) {
     return <LoadingPage />;
   }
-  console.log(isMobile);
 
   return (
     <Layout style={layoutStyle}>

@@ -8,7 +8,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 interface IUserData extends JwtPayload {
   nameAccount: string;
   isAdmin: boolean;
-  exp?: number;
+  expires_at?: number;
   thread: number;
 }
 
@@ -16,7 +16,7 @@ const isTokenExpired = (token: string): boolean => {
   try {
     const decodedToken = jwtDecode<IUserData>(token);
     const currentTime = Date.now() / 1000;
-    return decodedToken.exp ? decodedToken.exp < currentTime : true;
+    return decodedToken.expires_at ? decodedToken.expires_at < currentTime : true;
   } catch (error) {
     console.error("Token validation error:", error);
     return true;
