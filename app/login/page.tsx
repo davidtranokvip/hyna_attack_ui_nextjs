@@ -28,8 +28,9 @@ export default function Page() {
                 nameAccount: values.nameAccount,
                 password: values.password
             };
-          
+            
             const result = await loginApi(data);
+
             if (result.status === 'success') {
                 setTokenCookie(result.data.token)
                 setSuccess(result.message);

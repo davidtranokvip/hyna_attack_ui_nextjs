@@ -24,12 +24,13 @@ interface ILoginRes {
 }
 
 export const loginApi = async (req: ILoginReq) => {
-  const encryptedData = encryptData(req);
-  const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, {
-    encryptedData: encryptedData.encryptedData,
-    encryptedKey: encryptedData.encryptedKey,
-    iv: encryptedData.iv,  
-  });
+  // const encryptedData = encryptData(req);
+  // const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, {
+  //   encryptedData: encryptedData.encryptedData,
+  //   encryptedKey: encryptedData.encryptedKey,
+  //   iv: encryptedData.iv,  
+  // });
+  const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, req);
   return result.data;
 };
 
