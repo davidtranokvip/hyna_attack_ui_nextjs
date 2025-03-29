@@ -6,11 +6,10 @@ import { Button, Card, Empty, Table, Statistic, Row, Col, Popconfirm, TableProps
 import ParticlesAnimation from "@/components/elements/ParticlesAnimation";
 import {
   FaNetworkWired,
-  FaShieldAlt,
   FaCrosshairs,
 } from "react-icons/fa";
 import { motion } from "framer-motion";
-import { getListProcesses, stopMultipleProcesses, stopProcesses } from "@/api/attack";
+import { getListProcesses, stopProcesses } from "@/api/attack";
 import { useAuth } from "@/shared/lib/auth";
 
 interface TableData {
@@ -22,7 +21,15 @@ interface TableData {
   remaining_time: string;
   concurrents: number;
   pid: number;
+  total_elapsed_time?: string; 
 }
+
+const formatTime = (seconds: number) => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
   
 const Page = () => {
   const { user } = useAuth();
@@ -35,22 +42,30 @@ const Page = () => {
     },
     selectedRowKeys,
   };
-  
+
   const fetchData = async () => {
     try {
       setIsConnecting(true);
       const result = await getListProcesses();
       console.log(result);
       if (result.status === 'success') {
-        const newTableData: TableData[] = result.data.map((item) => ({
-          domain: item.domain,
-          attack_time: item.attack_time,
-          remaining_time: item.remaining_time,
-          concurrents: item.concurrents,
-          server_id: item.server_id,
-          server_name: item.server_name,
-          pid: item.pid,
-        }));
+        const newTableData: TableData[] = result.data.map((item) => {
+          const [minutes, seconds] = item.remaining_time.split(':').map(Number);
+          const elapsedSeconds = (minutes * 60) + seconds;
+          const attackTime = Number(item.attack_time);
+          const remainingSeconds = attackTime - elapsedSeconds;
+          
+          return {
+            domain: item.domain,
+            attack_time: item.attack_time,
+            remaining_time: formatTime(remainingSeconds > 0 ? remainingSeconds : 0),
+            concurrents: item.concurrents,
+            server_id: item.server_id,
+            server_name: item.server_name,
+            pid: item.pid,
+          };
+        });
+
         setIsConnecting(false);
         setTableData(newTableData);
       }
@@ -61,6 +76,35 @@ const Page = () => {
 
   useEffect(() => {
     fetchData();
+
+    const interval = setInterval(() => {
+      setTableData(prevData => {
+        let shouldFetchData = false;
+        const updatedData = prevData.map(item => {
+          const [hours, minutes, seconds] = item.remaining_time.split(':').map(Number);
+          let totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+          if (totalSeconds > 0) {
+            totalSeconds -= 1;
+            if (totalSeconds === 0) {
+              shouldFetchData = true;
+            }
+          }
+          return {
+            ...item,
+            remaining_time: formatTime(totalSeconds),
+          };
+        });
+
+        if (shouldFetchData) {
+          fetchData();
+        }
+
+        return updatedData;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+
   }, []);
 
   const handleCancelAllAttacks = async () => {
@@ -72,7 +116,7 @@ const Page = () => {
       const pidNumbers = selectedRowKeys.map(key => Number(key));
       const selectedItems = tableData.filter(item => selectedRowKeys.includes(item.pid));
       const serverIds = selectedItems.map(item => item.server_id);
-      const result = await stopMultipleProcesses(
+      const result = await stopProcesses(
         pidNumbers, 
         user?.isAdmin ? serverIds : undefined
       );
@@ -91,10 +135,10 @@ const Page = () => {
     setIsConnecting(true);
 
     try {
-      const result = await stopProcesses(pid, user?.isAdmin ? server_id : undefined);
+      const result = await stopProcesses([pid], user?.isAdmin ? [server_id] : undefined);
       if (result.status === 'success') {
         setIsConnecting(false);
-        fetchData()
+        fetchData();
       }
     } catch (error) {
       setIsConnecting(false);
@@ -112,8 +156,8 @@ const Page = () => {
       },
       {
         title: "Attack Time",
-        dataIndex: "attack_time",
-        key: "attack_time",
+        dataIndex: "remaining_time",
+        key: "remaining_time",
         className: "bg-card text-primary text-[1.125rem] leading-[normal] text-center",
       },
       {
@@ -192,19 +236,9 @@ const Page = () => {
                 <Card className="bg-gray-800 text-white">
                   <Statistic
                     title={<span className="text-primary">Total concurrents</span>}
-                    // value={`${scheduledTasks.current}/${scheduledTasks.total}`}
+                    value={tableData.reduce((sum, item) => sum + (item.concurrents || 0), 0)}
                     prefix={<FaNetworkWired className="mr-2 text-blue-500" />}
                     valueStyle={{ color: "#1890ff" }}
-                  />
-                </Card>
-              </Col>
-              <Col span={8}>
-                <Card className="bg-gray-800 text-white">
-                  <Statistic
-                    title={<span className="text-primary">Preset</span>}
-                    // value={`${presetTasks.current}/${presetTasks.total}`}
-                    prefix={<FaShieldAlt className="mr-2 text-yellow-500" />}
-                    valueStyle={{ color: "#faad14" }}
                   />
                 </Card>
               </Col>

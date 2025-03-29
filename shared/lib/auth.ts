@@ -9,7 +9,7 @@ interface IUserData extends JwtPayload {
   nameAccount: string;
   isAdmin: boolean;
   expires_at?: number;
-  thread: number;
+  id: number | null;
 }
 
 const isTokenExpired = (token: string): boolean => {
@@ -51,9 +51,9 @@ export const useAuth = () => {
           const decoded = jwtDecode<IUserData>(currentToken);
           setToken(currentToken);
           setUser({
+            id: decoded.id,
             nameAccount: decoded.nameAccount,
             isAdmin: decoded.isAdmin,
-            thread: decoded.thread,
           });
           if (isLoginPage) {
             router.replace('/');

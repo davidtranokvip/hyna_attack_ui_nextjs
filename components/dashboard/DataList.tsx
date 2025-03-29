@@ -99,9 +99,9 @@ const Datalist: React.FC<SectionProps> = ({ domain, filteredAndSorted, blockingI
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1, duration: 0.6, ease: 'easeOut' }}
                     >
-                      <td className="py-2 border-t text-primary">{item.location}</td>
-                      <td className="py-2 border-t text-primary">{item.code}</td>
-                      <td className="py-2 border-t text-primary text-right">{item["IP address"]}</td>
+                      <td className="py-2 border-t text-primary">{item.country}</td>
+                      <td className="py-2 border-t text-primary">{item.statusCode}</td>
+                      <td className="py-2 border-t text-primary text-right">{item.ip_result}</td>
                     </motion.tr>
                   ))
               ) : (

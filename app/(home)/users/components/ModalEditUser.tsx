@@ -23,7 +23,6 @@ interface IModalUserProps {
 }
 
 const ModalEditUser: React.FC<IModalUserProps> = ({ error, open, onClose, onSave, item, permissions, teamData,  serverData, selectedTeamId, onTeamChange  }) => {
-
     const [form] = Form.useForm<IUserItem>();
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<IPermissionId[]>([]);
     const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
