@@ -174,15 +174,15 @@ const Page = () => {
 
         const finalSetting = [...typeAttackSelect].sort((a, b) => a.stt - b.stt);
 
-        const concurrentsGroup = finalSetting.find(setting =>
-            setting.group.toLowerCase() === "concurrents"
-        );
+        // const concurrentsGroup = finalSetting.find(setting =>
+        //     setting.group.toLowerCase() === "concurrents"
+        // );
 
-        const totalThreads = concurrentsGroup
-            ? Math.max(...concurrentsGroup.value.map(item =>
-                typeof item.value === 'string' ? parseInt(item.value, 10) : item.value
-            ))
-            : 100;
+        // const totalThreads = concurrentsGroup
+        //     ? Math.max(...concurrentsGroup.value.map(item =>
+        //         typeof item.value === 'string' ? parseInt(item.value, 10) : item.value
+        //     ))
+        //     : 100;
 
         const filteredSettings = finalSetting.filter(setting => {
             const groupName = setting.group.toLowerCase();
