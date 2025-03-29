@@ -8,15 +8,15 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 interface IUserData extends JwtPayload {
   nameAccount: string;
   isAdmin: boolean;
-  exp?: number;
-  thread: number;
+  expires_at?: number;
+  id: number | null;
 }
 
 const isTokenExpired = (token: string): boolean => {
   try {
     const decodedToken = jwtDecode<IUserData>(token);
     const currentTime = Date.now() / 1000;
-    return decodedToken.exp ? decodedToken.exp < currentTime : true;
+    return decodedToken.expires_at ? decodedToken.expires_at < currentTime : true;
   } catch (error) {
     console.error("Token validation error:", error);
     return true;
@@ -51,9 +51,9 @@ export const useAuth = () => {
           const decoded = jwtDecode<IUserData>(currentToken);
           setToken(currentToken);
           setUser({
+            id: decoded.id,
             nameAccount: decoded.nameAccount,
             isAdmin: decoded.isAdmin,
-            thread: decoded.thread,
           });
           if (isLoginPage) {
             router.replace('/');

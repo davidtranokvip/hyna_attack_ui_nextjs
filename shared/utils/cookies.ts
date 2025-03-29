@@ -15,4 +15,4 @@ export const getTokenFromCookie = () => {
 
 export const removeTokenCookie = () => {
   Cookies.remove('hyna_token', { path: '/' });
-};
+};  

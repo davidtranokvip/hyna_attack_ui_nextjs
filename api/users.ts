@@ -63,4 +63,3 @@ export const getUserLog = async () => {
     const result = await axiosInstance.get<IUserLog>(`${apiUrl}/log`);
     return result.data;
 }
-  

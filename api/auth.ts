@@ -17,19 +17,20 @@ export interface IUpdateReq {
 interface ILoginRes {
   data: {
     token: string;
+    expires_at: Date;
   };
   message: string;
   status: string;
 }
 
 export const loginApi = async (req: ILoginReq) => {
-  // const encryptedData = encryptData(req);
-  // const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, {
-  //   encryptedData: encryptedData.encryptedData,
-  //   encryptedKey: encryptedData.encryptedKey,
-  //   iv: encryptedData.iv,  
-  // });
-  const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, req);
+  const encryptedData = encryptData(req);
+  const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, {
+    encryptedData: encryptedData.encryptedData,
+    encryptedKey: encryptedData.encryptedKey,
+    iv: encryptedData.iv,  
+  });
+  // const result = await axiosInstancePublic.post<ILoginRes>(`${apiUrl}/login`, req);
   return result.data;
 };
 

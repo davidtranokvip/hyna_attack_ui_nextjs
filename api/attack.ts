@@ -76,10 +76,16 @@ interface IListProcesses {
   remaining_time: string;
   concurrents: number;
   pid: number;
+  server_id: number;
+  server_name: string;
 }
 
-export const stopProcesses = async (pid: number) => {
-  const result = await axiosInstance.post<DataListResponse<IListProcesses>>(`${apiUrl}/stop_process/${pid}`);
+export const stopProcesses = async (pids : number[], server_ids?: number[]) => {
+  const body: any = { pids };
+  if (server_ids !== undefined) {
+    body.server_ids = server_ids;
+  }
+  const result = await axiosInstance.post(`${apiUrl}/stop_processes`, body);
   return result.data;
 };
 

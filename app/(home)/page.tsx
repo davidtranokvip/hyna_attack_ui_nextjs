@@ -5,9 +5,9 @@ import { motion, AnimatePresence  } from "framer-motion";
 import NoticeError from "@/components/notice/NoticeError";
 import Datalist from "@/components/dashboard/DataList";
 import Image from "next/image";
+import { checkHostApi } from "@/api/checkhost";
 
-const targetLocation = "Vietnam, Ho Chi Minh City";
-const baseUrlBlockHost = process.env.NEXT_PUBLIC_BASE_API_BLOCK_HOST;
+const targetCountry = "Vietnam";
 const baseUrlBlockInternet = process.env.NEXT_PUBLIC_BASE_API_BLOCKING_INTERNET;
 
 export default function Home() {
@@ -52,19 +52,19 @@ export default function Home() {
     }
 
     try {
-      const [blockSiteResponse, checkResponse] = await Promise.all([
+      const [checkInternet, checkHost] = await Promise.all([
         axios.get(`${baseUrlBlockInternet}/site`, {
           params: { domain: target }
         }),
-        axios.post(`${baseUrlBlockHost}/check`, { target: cleanedUrl })
+        checkHostApi({ host: target })
       ]);
   
-      if (blockSiteResponse?.data) {
-        setBlockingInterNet(blockSiteResponse.data);
+      if (checkInternet?.data) {
+        setBlockingInterNet(checkInternet.data);
       }
       
-      if (checkResponse?.data?.data) {
-        setResult(checkResponse.data.data);
+      if (checkHost?.data) {
+        setResult(checkHost.data);
       }
     } catch (error: any) {
       console.error('error', error)
@@ -74,12 +74,12 @@ export default function Home() {
 
   const filteredAndSorted = result && result.length > 0
     ? result
-        .filter((item: any) => item?.code !== 'no data' && item?.code !== null)
+        .filter((item: any) => item?.statusCode !== 'no data' && item?.statusCode !== null)
         .slice()
         .sort((a: any, b: any) => {
-          if (a.location === targetLocation && b.location !== targetLocation)
+          if (a.country === targetCountry && b.country !== targetCountry)
             return -1;
-          if (b.location === targetLocation && a.location !== targetLocation)
+          if (b.country === targetCountry && a.country !== targetCountry)
             return 1;
           return 0;
         })
@@ -87,8 +87,8 @@ export default function Home() {
 
   const blockedCountries: string[] = filteredAndSorted
     .map((item: any) => {
-      if (item.code != 200) {
-        return item.location.split(",")[0].trim();
+      if (item.statusCode != 200) {
+        return item.country;
       } else {
         return null;
       }
