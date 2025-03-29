@@ -73,7 +73,7 @@ const Page = () => {
         if (user?.isAdmin) {
             fetchingData();
         }
-    }, []);
+    }, [user]);
 
     const generateInitialValues = useCallback((settings: ISettingItem[]) => {
         const initialValues: Record<string, any> = {};
